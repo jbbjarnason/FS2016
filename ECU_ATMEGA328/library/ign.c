@@ -6,11 +6,11 @@
  */
 
 #include "ign.h"
-
+#include "global.h"
 
 void ignInit()
 {
-	cli();	// Turn interrupts off
+	cli();	// Turn global interrupts off
 	// Crankshaft interrupt pins
 	EICRA |= (1 << ISC11) | (1 << ISC10);		// Set INT1 to rising edge
 	EICRA |= (1 << ISC01) | (1 << ISC00);		// Set INT0 to rising edge
@@ -25,8 +25,10 @@ void ignInit()
 	// Declare the pin used for the DCI ignition system
 	DDRD |= (1 << PIND4);						// Ignition pin
 	PORTD &= ~(1 << PIND4);						// Turn ignition pin off
-	sei(); 	// Turn interrupts back on
+	sei(); 	// Turn global interrupts back on
 }
+
+
 void tablelookup(int *x, int *y)
 {
 	//for(unsigned char RPMIndex = 0; RPMIndex < )
@@ -41,14 +43,18 @@ ISR(INT0_vect)
 		ovf = 0;			// To be implemented later !!!!!!!!!!!!!!!!!!!!
 		return;
 	}
-	int x_ign_tab, y_ign_tab;
-	tablelookup(x_ign_tab, y_ign_tab);
+	//int x_ign_tab, y_ign_tab;
+	//tablelookup(x_ign_tab, y_ign_tab);
 }
+
+
 ISR(TIMER1_OVF_vect)
 {
 
 	ovf = 1; 								// over flow occurred
 }
+
+
 ISR(TIMER1_COMPB_vect)
 {
 	PORTD ^= (1 << PIND4);
@@ -66,24 +72,26 @@ ISR(INT1_vect)
 	EIMSK &= ~(1 << INT1);						// Disable INT1 interrupt
 }
 
+
 void ign_tab_init()
 {
-	/*double A[DiffNr][ANr] =
-	{					// SFOC polynomial constants (Array) line 1 is group 1 ...
-		{-2.0, 8.0, 8.0, 8.0, 8.0},
-		{208.4, -0.06854, -0.006891, 0.00006125, 0}
-	};
-	// Fixment to call a function with a two dimensional array
+	table.RPMLength = 23;
+	table.LoadLength = 1;
 
-	double **Afix = new double*[DiffNr];
+	int temp_rpm[MAINTABLE_MAX_RPM_LENGTH] =
+			{ 200,700,1100,1500,1900,2300,2700,3100,3500,3900,4300,4700,
+			5100,5500,5900,6300,6700,7100,7500,7900,8300,8700,9100};
 
-	for (int i = 0; i < DiffNr; i++)
-    {
-    	Afix[i] = A[i];
+	float temp_table[MAINTABLE_MAX_RPM_LENGTH] =
+			{-2.0, 8.0,	8.0, 8.0, 8.0, 12.4, 18.3, 24.2, 30.0, 30.0, 30.0, 30.0,
+			30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 26.0, 18.0};
+
+
+	for(int i = 0; i < table.RPMLength; i++)
+	{
+		table.RPM[i] = temp_rpm[i];
+		table.Table[i] = temp_table[i];
 	}
-
-
-}*/
 
 }
 
