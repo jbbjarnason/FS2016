@@ -29,7 +29,7 @@ void ignInit()
 }
 void tablelookup(int *x, int *y)
 {
-	for(unsigned char RPMIndex = 0; RPMIndex < )
+	//for(unsigned char RPMIndex = 0; RPMIndex < )
 }
 
 // Interrupts with when low signal on crankshaft (60°BTDC)
@@ -68,7 +68,7 @@ ISR(INT1_vect)
 
 void ign_tab_init()
 {
-	double A[DiffNr][ANr] =
+	/*double A[DiffNr][ANr] =
 	{					// SFOC polynomial constants (Array) line 1 is group 1 ...
 		{-2.0, 8.0, 8.0, 8.0, 8.0},
 		{208.4, -0.06854, -0.006891, 0.00006125, 0}
@@ -83,7 +83,7 @@ void ign_tab_init()
 	}
 
 
-}
+}*/
 
 }
 
