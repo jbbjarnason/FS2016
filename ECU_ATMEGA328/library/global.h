@@ -23,11 +23,13 @@
 #define TIMER1_US_CONST		4		// Timer 1 prescaled to 4 µs
 
 
+
 struct engine_t
 {
-	uint32_t rpm_c; 	//rpm cycle in µs
+	unsigned int rpm_c; 	// RPM cycle in 4µs (counter values)
+	char status;			// Is the engine on (1 On, 0 off)
+	char ign;				// Is time to spark (1 On, 0 off)
 };
-
 
 struct ignition_t
 {

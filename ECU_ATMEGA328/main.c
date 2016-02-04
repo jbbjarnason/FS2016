@@ -8,6 +8,9 @@
 #include <avr/interrupt.h>
 #include <UART.h>
 #include <ign.h>
+#include <delay.h>
+
+volatile struct engine_t engine;
 
 int main(void)
 {
@@ -18,6 +21,8 @@ int main(void)
 
 	for (;;)
 	{
-
+		printchar('C');
+		println(engine.rpm_c);
+		delayms(1000);
 	}
 }

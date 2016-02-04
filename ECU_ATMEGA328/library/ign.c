@@ -10,7 +10,12 @@
 
 void ignInit()
 {
+	// Initialize structs
 	ign_tab_init();
+	engine.rpm_c = 0;
+	engine.status = false;
+	engine.ign = false;
+
 	cli();	// Turn global interrupts off
 	// Crankshaft interrupt pins
 	EICRA |= (1 << ISC11) | (1 << ISC10);		// Set INT1 to rising edge
@@ -21,6 +26,7 @@ void ignInit()
 	TCCR1B |= (1 << CS10) | (1 << CS11);		// Prescale to 4µs
 	// Overflow interrupt for cycle less than 65536*4µs = 0,262144 s
 	TIMSK1 |= (1 << TOIE1);			// Turn on overflow interrupt
+	TIMSK1 |= (1 << OCIE1B);
 	// Initialize the counter value
 	TCNT1 = 0;									// Zero counter 1
 	// Declare the pin used for the DCI ignition system
@@ -79,15 +85,14 @@ ISR(INT0_vect)
 	unsigned char degree = 0;
 	if (highRPMIndex == 0) { // below 500 rpm in our case
 		EIMSK |= (1 << INT1);						// Enable INT1 interrupt
+		engine.status = false;
 		return;
 	} else {
+		engine.status = true;
 		degree = (table.Table[highRPMIndex] + table.Table[highRPMIndex]) / 2;
 	}
-	println(engine.rpm_c);
 	uint16_t calc_counts = (engine.rpm_c / 360) * (CRANK_SIGNAL_ANGLE - degree);
-	println(calc_counts);
-	OCR1B = (int) calc_counts;
-	TIMSK1 |= (1 << OCIE1B);
+	OCR1B = calc_counts;
 }
 
 
@@ -99,17 +104,28 @@ ISR(TIMER1_OVF_vect)
 ISR(TIMER1_COMPB_vect)
 {
 	PORTD ^= (1 << PIND4);
-	TIMSK1 &= ~(1 << OCIE1B);
-	//PORTD |= (1 << PIND4);						// Turn on ignition
-	//PORTD &= ~(1 << PIND4);						// Turn off ignition
+	/*if (engine.status == true){
+		if (engine.ign == true){
+			printchar('a');
+			PORTD |= (1 << PIND4);						// Turn ignition on
+			OCR1B = TCNT1 + IGN_TIME;
+			engine.ign = false;
+		} else {
+			PORTD &= ~(1 << PIND4);						// Turn ignition off
+			engine.ign = true;
+		}
+	}*/
+	/*if (engine.ign == false) {
+
+	}*/
 }
 
 //Crank high
 ISR(INT1_vect)
 {
-	//PORTD |= (1 << PIND4);						// Turn on ignition
-	//PORTD &= ~(1 << PIND4);						// Turn off ignition
-	//PORTD ^= (1 << PIND4);
+	/*PORTD |= (1 << PIND4);						// Turn on ignition
+	OCR1B = TCNT1 + IGN_TIME;					// Turn off ignition after specified time
+	engine.ign = false;*/
 	EIMSK &= ~(1 << INT1);						// Disable INT1 interrupt
 }
 

@@ -51,3 +51,11 @@ void println(unsigned int data)
 	while(!((UCSR0A & 0x20) == 0x20)){ }
 	UDR0 = 10; // new line
 }
+
+void printchar(char data)
+{
+	while(!((UCSR0A & 0x20) == 0x20)){ }
+	UDR0 = data; // new line
+	while(!((UCSR0A & 0x20) == 0x20)){ }
+	UDR0 = 32; // whitespace
+}
