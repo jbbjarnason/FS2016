@@ -11,12 +11,10 @@
 
 int main(void)
 {
-
 	uartInit(57600); // baud rate 57k
 	ignInit();
 	println(1234);
 	println(1);
-
 
 	for (;;)
 	{
