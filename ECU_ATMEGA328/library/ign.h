@@ -12,12 +12,13 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "global.h"
+#include "UART.h"
 
 void ignInit();
-void tablelookup(int *x, int *y);
+void ign_tab_init();
 char ovf; // overflow of cycle timer
 volatile struct engine_t engine;
-
+volatile struct ignition_t table;
 
 
 

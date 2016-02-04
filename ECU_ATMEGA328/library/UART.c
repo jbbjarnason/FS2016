@@ -18,6 +18,8 @@ void uartInit(uint32_t baud_rate)
 	UCSR0B = (1<<RXEN0)|(1<<TXEN0);
 	//Set frame format at 8 data bits and 2 stop bits.
 	UCSR0C |= 0x0E;
+	while(!((UCSR0A & 0x20) == 0x20)){ }
+	UDR0 = 10; // new line
 }
 
 //Send Integers over to terminal
@@ -39,6 +41,8 @@ void print(unsigned int data)
 		data %= div;
 		div /= 10;
 	}
+	while(!((UCSR0A & 0x20) == 0x20)){ }
+	UDR0 = 32; // whitespace
 }
 
 void println(unsigned int data)
