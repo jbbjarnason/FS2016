@@ -20,7 +20,7 @@ void ignInit()
 	// Clock to time from crank signal to ignition pulse
 	TCCR1B |= (1 << CS10) | (1 << CS11);		// Prescale to 4µs
 	// Overflow interrupt for cycle less than 65536*4µs = 0,262144 s
-	TIMSK1 |= (1 << TOIE1) | (1 << OCIE1B);			// Turn on overflow interrupt
+	TIMSK1 |= (1 << TOIE1);			// Turn on overflow interrupt
 	// Initialize the counter value
 	TCNT1 = 0;									// Zero counter 1
 	// Declare the pin used for the DCI ignition system
