@@ -92,13 +92,8 @@ ISR(INT0_vect)
 		degree = (table.Table[highRPMIndex] + table.Table[highRPMIndex]) / 2;
 	}
 	uint16_t calc_counts = (engine.rpm_c / 360) * (CRANK_SIGNAL_ANGLE - degree);
-	OCR1B = calc_counts;
-}
+	OCR1B = calc_counts - TCNT1;
 
-
-ISR(TIMER1_OVF_vect)
-{
-	ovf = 1; 								// over flow occurred
 }
 
 ISR(TIMER1_COMPB_vect)
@@ -118,6 +113,11 @@ ISR(TIMER1_COMPB_vect)
 	/*if (engine.ign == false) {
 
 	}*/
+}
+
+ISR(TIMER1_OVF_vect)
+{
+	ovf = 1; 								// over flow occurred
 }
 
 //Crank high
