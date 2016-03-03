@@ -63,7 +63,7 @@ ISR(INT1_vect)
 {
 	engine.rpm_c = TCNT1; 	// Store the latest cycle value
 	TCNT1 = 0; 				// Initialize the cycle counter
-	if (engine.rpm_c < STARTING_COUNTS)
+	if (engine.rpm_c > STARTING_COUNTS)
 	{
 		EIMSK |= (1 << INT0);						// Enable INT0 interrupt
 		return;
