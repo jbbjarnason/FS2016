@@ -63,7 +63,11 @@ ISR(INT1_vect)
 {
 	engine.rpm_c = TCNT1; 	// Store the latest cycle value
 	TCNT1 = 0; 				// Initialize the cycle counter
-	if (engine.rpm_c < )
+	if (engine.rpm_c < STARTING_COUNTS)
+	{
+		EIMSK |= (1 << INT0);						// Enable INT0 interrupt
+		return;
+	}
 	/*if (ovf == 1) {			// If the cycle was longer than 0,262 sec
 		ovf = 0;			// To be implemented later !!!!!!!!!!!!!!!!!!!!
 		return;
@@ -101,9 +105,9 @@ ISR(TIMER1_COMPB_vect)
 {
 	if (engine.ign)
 	{
-		PORTD &= (0 << PIND4);
+		PORTD &= ~(1 << PIND4);
 		engine.ign = false;
-		OCR1B = TCNT1 + 250;
+		OCR1B = TCNT1 + IGN_COUNTS;
 	}
 	else
 	{
@@ -122,7 +126,9 @@ ISR(INT0_vect)
 	/*PORTD |= (1 << PIND4);						// Turn on ignition
 	OCR1B = TCNT1 + IGN_TIME;					// Turn off ignition after specified time
 	engine.ign = false;*/
-	EIMSK &= ~(1 << INT0);						// Disable INT1 interrupt
+	PORTD &= ~(1 << PIND4);
+	OCR1B = TCNT1 + IGN_COUNTS;
+	EIMSK &= ~(1 << INT0);						// Disable INT0 interrupt
 }
 
 
