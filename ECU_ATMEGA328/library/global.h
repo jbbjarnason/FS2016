@@ -24,7 +24,8 @@
 #define STARTING_RPM			500
 #define STARTING_COUNTS			60000 / STARTING_RPM * 1000 / TIMER1_US_CONST
 #define IGN_COUNTS				250		// Spark for 250 counts * 4 µs = 1ms
-
+#define RPM_LIMIT				9100
+#define REV_LIMIT_COUNTS		60000 / RPM_LIMIT * 1000 / TIMER1_US_CONST
 
 
 struct engine_t
