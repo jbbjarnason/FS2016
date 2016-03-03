@@ -9,7 +9,6 @@
 #define LIBRARY_IGN_H_
 
 #define CRANK_SIGNAL_ANGLE	60		// Angle from Low crank signal to top dead center
-#define IGN_TIME 			100		// 100 * 4 µs = 400 µs for ignition pulse
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
