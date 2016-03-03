@@ -25,8 +25,8 @@ void ignInit()
 	// Clock to time from crank signal to ignition pulse
 	TCCR1B |= (1 << CS10) | (1 << CS11);		// Prescale to 4µs
 	// Overflow interrupt for cycle less than 65536*4µs = 0,262144 s
-	TIMSK1 |= (1 << TOIE1);			// Turn on overflow interrupt
-	TIMSK1 |= (1 << OCIE1B);
+	//TIMSK1 |= (1 << TOIE1);			// Turn on overflow interrupt
+	TIMSK1 |= (1 << OCIE1B);			// Turn on compare match B interrupt
 	// Initialize the counter value
 	TCNT1 = 0;									// Zero counter 1
 	// Declare the pin used for the DCI ignition system
@@ -63,10 +63,11 @@ ISR(INT1_vect)
 {
 	engine.rpm_c = TCNT1; 	// Store the latest cycle value
 	TCNT1 = 0; 				// Initialize the cycle counter
-	if (ovf == 1) {			// If the cycle was longer than 0,262 sec
+	if (engine.rpm_c < )
+	/*if (ovf == 1) {			// If the cycle was longer than 0,262 sec
 		ovf = 0;			// To be implemented later !!!!!!!!!!!!!!!!!!!!
 		return;
-	}
+	}*/
 	char lowRPMIndex = 0;
 	char highRPMIndex = table.RPMLength - 1;
 	for (unsigned char RPMIndex = 0; RPMIndex < table.RPMLength; RPMIndex++)
@@ -94,7 +95,6 @@ ISR(INT1_vect)
 	uint16_t calc_counts = (engine.rpm_c / 360) * (CRANK_SIGNAL_ANGLE - degree);
 	OCR1B = calc_counts - TCNT1;
 	engine.ign = true;
-
 }
 
 ISR(TIMER1_COMPB_vect)
@@ -111,10 +111,10 @@ ISR(TIMER1_COMPB_vect)
 	}
 }
 
-ISR(TIMER1_OVF_vect)
+/*ISR(TIMER1_OVF_vect)
 {
 	ovf = 1; 								// over flow occurred
-}
+}*/
 
 //Crank high
 ISR(INT0_vect)

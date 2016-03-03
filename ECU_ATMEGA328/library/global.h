@@ -21,6 +21,8 @@
 #endif
 
 #define TIMER1_US_CONST		4		// Timer 1 prescaled to 4 µs
+#define STARTING_RPM		500
+
 
 
 
