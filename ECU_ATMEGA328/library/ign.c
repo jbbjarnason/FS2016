@@ -98,7 +98,23 @@ ISR(INT0_vect)
 
 ISR(TIMER1_COMPB_vect)
 {
-	PORTD ^= (1 << PIND4);
+	if (engine.ign)
+	{
+		PORTD &= (0 << PIND4);
+		engine.ign = 0;
+		OCR1B = TCNT1 + 250;
+
+	}
+	else
+	{
+		PORTD |= (1 << PIND4);
+		engine.ign = 1;
+	}
+
+
+
+
+	//PORTD ^= (1 << PIND4);
 	/*if (engine.status == true){
 		if (engine.ign == true){
 			printchar('a');
