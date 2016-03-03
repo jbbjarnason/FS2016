@@ -19,6 +19,7 @@
 void ignInit();
 void ign_tab_init();
 char ovf; // overflow of cycle timer
+
 volatile struct engine_t engine;
 volatile struct ignition_t table;
 
