@@ -93,6 +93,7 @@ ISR(INT1_vect)
 	}
 	uint16_t calc_counts = (engine.rpm_c / 360) * (CRANK_SIGNAL_ANGLE - degree);
 	OCR1B = calc_counts - TCNT1;
+	engine.ign = true;
 
 }
 
@@ -101,34 +102,13 @@ ISR(TIMER1_COMPB_vect)
 	if (engine.ign)
 	{
 		PORTD &= (0 << PIND4);
-		engine.ign = 0;
+		engine.ign = false;
 		OCR1B = TCNT1 + 250;
-
 	}
 	else
 	{
 		PORTD |= (1 << PIND4);
-		engine.ign = 1;
 	}
-
-
-
-
-	//PORTD ^= (1 << PIND4);
-	/*if (engine.status == true){
-		if (engine.ign == true){
-			printchar('a');
-			PORTD |= (1 << PIND4);						// Turn ignition on
-			OCR1B = TCNT1 + IGN_TIME;
-			engine.ign = false;
-		} else {
-			PORTD &= ~(1 << PIND4);						// Turn ignition off
-			engine.ign = true;
-		}
-	}*/
-	/*if (engine.ign == false) {
-
-	}*/
 }
 
 ISR(TIMER1_OVF_vect)
