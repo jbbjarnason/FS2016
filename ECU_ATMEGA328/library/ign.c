@@ -68,6 +68,10 @@ ISR(INT1_vect)
 		EIMSK |= (1 << INT0);						// Enable INT0 interrupt
 		return;
 	}
+	if(engine.rpm_c < REV_LIMIT_COUNTS)
+	{
+		return;
+	}
 	/*if (ovf == 1) {			// If the cycle was longer than 0,262 sec
 		ovf = 0;			// To be implemented later !!!!!!!!!!!!!!!!!!!!
 		return;
