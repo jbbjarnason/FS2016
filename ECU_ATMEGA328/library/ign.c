@@ -58,7 +58,7 @@ void ign_tab_init()
 	}
 }
 
-// Interrupts when low signal on crankshaft (60°BTDC)
+// Interrupts with when low signal on crankshaft (60°BTDC)
 ISR(INT1_vect)
 {
 	engine.rpm_c = TCNT1; 	// Store the latest cycle value
@@ -109,13 +109,13 @@ ISR(TIMER1_COMPB_vect)
 {
 	if (engine.ign)
 	{
-		PORTD &= ~(1 << PIND4);			// Turn on ignition
-		engine.ign = false;				// Turn flag off
-		OCR1B = TCNT1 + IGN_COUNTS;		// Turn off ignition after specified time
+		PORTD &= ~(1 << PIND4);
+		engine.ign = false;
+		OCR1B = TCNT1 + IGN_COUNTS;
 	}
 	else
 	{
-		PORTD |= (1 << PIND4);			// Turn off ignition
+		PORTD |= (1 << PIND4);
 	}
 }
 
@@ -124,11 +124,14 @@ ISR(TIMER1_COMPB_vect)
 	ovf = 1; 								// over flow occurred
 }*/
 
-//Crank high, 2 degrees advanced top dead center
+//Crank high
 ISR(INT0_vect)
 {
-	PORTD &= ~(1 << PIND4);						// Turn on ignition
-	OCR1B = TCNT1 + IGN_COUNTS;					// Turn off ignition after specified time
+	/*PORTD |= (1 << PIND4);						// Turn on ignition
+	OCR1B = TCNT1 + IGN_TIME;					// Turn off ignition after specified time
+	engine.ign = false;*/
+	PORTD &= ~(1 << PIND4);
+	OCR1B = TCNT1 + IGN_COUNTS;
 	EIMSK &= ~(1 << INT0);						// Disable INT0 interrupt
 }
 
