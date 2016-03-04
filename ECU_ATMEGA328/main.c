@@ -21,9 +21,9 @@ int main(void)
 
 	for (;;)
 	{
-		println(engine.ign);
-		printchar('C');
-		println(engine.rpm_c);
+		//println(engine.ign);
+		//printchar('C');
+		//println(engine.rpm_c);
 		delayms(1000);
 	}
 }

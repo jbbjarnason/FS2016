@@ -65,6 +65,7 @@ ISR(INT1_vect)
 	TCNT1 = 0; 				// Initialize the cycle counter
 	if (engine.rpm_c > STARTING_COUNTS)
 	{
+		println('poop')
 		EIMSK |= (1 << INT0);						// Enable INT0 interrupt
 		return;
 	}
