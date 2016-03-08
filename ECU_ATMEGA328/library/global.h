@@ -22,10 +22,10 @@
 
 #define TIMER1_US_CONST			4		// Timer 1 prescaled to 4 µs
 #define STARTING_RPM			500
-#define STARTING_COUNTS			60000 / STARTING_RPM * 1000 / TIMER1_US_CONST
+#define STARTING_COUNTS			60000 / STARTING_RPM * 1000 / 4
 #define IGN_COUNTS				250		// Spark for 250 counts * 4 µs = 1ms
 #define RPM_LIMIT				9100
-#define REV_LIMIT_COUNTS		60000 / RPM_LIMIT * 1000 / TIMER1_US_CONST
+#define REV_LIMIT_COUNTS		60000 / RPM_LIMIT * 1000 / 4
 
 
 struct engine_t

@@ -24,6 +24,6 @@ int main(void)
 		//println(engine.ign);
 		//printchar('C');
 		//println(engine.rpm_c);
-		delayms(1000);
+		//delayms(1000);
 	}
 }

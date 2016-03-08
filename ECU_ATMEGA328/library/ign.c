@@ -21,7 +21,7 @@ void ignInit()
 	EICRA |= (1 << ISC11) | (1 << ISC10);		// Set INT1 to rising edge
 	EICRA |= (1 << ISC01) | (1 << ISC00);		// Set INT0 to rising edge
 	// Crankshaft Low signal, comes 60° before top dead center
-	EIMSK |= (1 << INT1);						// Enable INT0 interrupt
+	EIMSK |= (1 << INT1);						// Enable INT0 interrupt*****************
 	// Clock to time from crank signal to ignition pulse
 	TCCR1B |= (1 << CS10) | (1 << CS11);		// Prescale to 4µs
 	// Overflow interrupt for cycle less than 65536*4µs = 0,262144 s
@@ -59,18 +59,22 @@ void ign_tab_init()
 }
 
 // Interrupts with when low signal on crankshaft (60°BTDC)
-ISR(INT1_vect)
+ISR(INT1_vect)										//******************
 {
 	engine.rpm_c = TCNT1; 	// Store the latest cycle value
 	TCNT1 = 0; 				// Initialize the cycle counter
-	if (engine.rpm_c > STARTING_COUNTS)
+	//println(engine.rpm_c);
+	//println(STARTING_COUNTS);
+	//println(REV_LIMIT_COUNTS);
+	if(engine.rpm_c > STARTING_COUNTS)
 	{
-		printchar('p');
-		EIMSK |= (1 << INT0);						// Enable INT0 interrupt
+		//printchar('p');
+		EIMSK |= (1 << INT0);						// Enable INT0 interrupt**************
 		return;
 	}
 	if(engine.rpm_c < REV_LIMIT_COUNTS)
 	{
+		//println(REV_LIMIT_COUNTS);
 		return;
 	}
 	/*if (ovf == 1) {			// If the cycle was longer than 0,262 sec
@@ -93,8 +97,8 @@ ISR(INT1_vect)
 		}
 	}
 	unsigned char degree = 0;
-	if (highRPMIndex == 0) { // below 500 rpm in our case
-		EIMSK |= (1 << INT1);						// Enable INT1 interrupt
+	if (highRPMIndex == 0) { 						// below 500 rpm in our case
+		EIMSK |= (1 << INT1);						// Enable INT1 interrupt*************
 		engine.status = false;
 		return;
 	} else {
@@ -126,14 +130,14 @@ ISR(TIMER1_COMPB_vect)
 }*/
 
 //Crank high
-ISR(INT0_vect)
+ISR(INT0_vect)									//************
 {
 	/*PORTD |= (1 << PIND4);						// Turn on ignition
 	OCR1B = TCNT1 + IGN_TIME;					// Turn off ignition after specified time
 	engine.ign = false;*/
 	PORTD &= ~(1 << PIND4);
 	OCR1B = TCNT1 + IGN_COUNTS;
-	EIMSK &= ~(1 << INT0);						// Disable INT0 interrupt
+	EIMSK &= ~(1 << INT0);						// Disable INT0 interrupt**********
 }
 
 
