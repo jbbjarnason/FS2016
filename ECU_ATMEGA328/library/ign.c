@@ -48,7 +48,6 @@ void ign_tab_init()
 			{-2.0, 8.0,	8.0, 8.0, 8.0, 12.4, 18.3, 24.2, 30.0, 30.0, 30.0, 30.0,
 			30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 26.0, 18.0};
 
-
 	for(int i = 0; i < table.RPMLength; i++)
 	{
 		table.RPM[i] = temp_rpm[i];
@@ -66,12 +65,12 @@ ISR(INT1_vect)										//******************
 	//println(engine.rpm_c);
 	//println(STARTING_COUNTS);
 	//println(REV_LIMIT_COUNTS);
-	if(engine.rpm_c > STARTING_COUNTS)
+	/*if(engine.rpm_c > STARTING_COUNTS)
 	{
 		//printchar('p');
 		EIMSK |= (1 << INT0);						// Enable INT0 interrupt**************
 		return;
-	}
+	}*/
 	if(engine.rpm_c < REV_LIMIT_COUNTS)
 	{
 		//println(REV_LIMIT_COUNTS);
@@ -96,7 +95,7 @@ ISR(INT1_vect)										//******************
 			break;
 		}
 	}
-	unsigned char degree = 0;
+	/*unsigned char degree = 0;
 	if (highRPMIndex == 0) { 						// below 500 rpm in our case
 		EIMSK |= (1 << INT1);						// Enable INT1 interrupt*************
 		engine.status = false;
@@ -104,7 +103,8 @@ ISR(INT1_vect)										//******************
 	} else {
 		engine.status = true;
 		degree = (table.Table[highRPMIndex] + table.Table[highRPMIndex]) / 2;
-	}
+	}*/
+	unsigned char degree = ((table.Table[highRPMIndex] + table.Table[highRPMIndex]) / 2);
 	uint16_t calc_counts = (engine.rpm_c / 360) * (CRANK_SIGNAL_ANGLE - degree);
 	OCR1B = calc_counts - TCNT1;
 	engine.ign = true;
@@ -114,13 +114,13 @@ ISR(TIMER1_COMPB_vect)
 {
 	if (engine.ign)
 	{
-		PORTD &= ~(1 << PIND4);
+		PORTD |= (1 << PIND4);
 		engine.ign = false;
 		OCR1B = TCNT1 + IGN_COUNTS;
 	}
 	else
 	{
-		PORTD |= (1 << PIND4);
+		PORTD &= ~(1 << PIND4);
 	}
 }
 
@@ -130,16 +130,16 @@ ISR(TIMER1_COMPB_vect)
 }*/
 
 //Crank high
-ISR(INT0_vect)									//************
+/*ISR(INT0_vect)									//************
 {
 	/*PORTD |= (1 << PIND4);						// Turn on ignition
 	OCR1B = TCNT1 + IGN_TIME;					// Turn off ignition after specified time
-	engine.ign = false;*/
-	PORTD &= ~(1 << PIND4);
+	engine.ign = false;*
+	PORTD |= (1 << PIND4);
 	OCR1B = TCNT1 + IGN_COUNTS;
 	EIMSK &= ~(1 << INT0);						// Disable INT0 interrupt**********
 }
-
+*/
 
 
 
