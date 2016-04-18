@@ -114,8 +114,10 @@ ISR(INT1_vect)										//******************
 	unsigned char degree = ((table.Table[highRPMIndex] + table.Table[lowRPMIndex]) / 2);
 	uint16_t calc_counts = (engine.rpm_c / 360) * (CRANK_SIGNAL_ANGLE - degree);
 	TIMSK1 |= (1 << OCIE1A) | (1 << OCIE1B);
-	OCR1B = calc_counts - TCNT1;
-	OCR1A = (table.dwell[highRPMIndex] + table.dwell[highRPMIndex]) / 2;
+	OCR1B = calc_counts; //- TCNT1;
+	OCR1A = engine.rpm_c - ((4 * engine.rpm_c) / 10);
+	//OCR1A = (table.dwell[highRPMIndex] + table.dwell[lowRPMIndex]) / 2 + calc_counts;
+	println(OCR1A);
 	//printchar('B');println(OCR1B);
 	//println(TCNT1);
 	//engine.ign = true;
@@ -141,16 +143,19 @@ ISR(TIMER1_COMPA_vect)
 {
 	PORTD |= (1 << PIND4); // Turn on coil
 	TIMSK1 &= ~(1 << OCIE1A);
+	println(0);
 }
 // Time to SPARK !!
 ISR(TIMER1_COMPB_vect)
 {
 	PORTD &= ~(1 << PIND4); // Spark
 	TIMSK1 &= ~(1 << OCIE1B);
+	println(1);
 }
 ISR(TIMER1_OVF_vect)
 {
 	PORTD &= ~(1 << PIND4); // Safety for ignition overheating
+	println(2);
 }
 /*ISR(TIMER1_OVF_vect)
 {
