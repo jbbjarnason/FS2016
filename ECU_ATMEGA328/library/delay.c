@@ -24,7 +24,7 @@ void delayInit()
 	sei();					// Enable interrupts again
 
 	// Test pin
-	DDRB |= (1 << PB0);
+	DDRB |= (1 << PINB0);
 }
 void set_millis(unsigned long set)
 {
@@ -47,6 +47,6 @@ void delayms(unsigned int delay)
 
 ISR(TIMER2_COMPA_vect)
 {
-	PORTB ^= (1 << PB0);
+	PORTB ^= (1 << PINB0);
 	millis++;
 }

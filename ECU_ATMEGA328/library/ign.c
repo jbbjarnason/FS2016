@@ -25,12 +25,13 @@ void ignInit()
 	// Clock to time from crank signal to ignition pulse
 	TCCR1B |= (1 << CS10) | (1 << CS11);		// Prescale to 4µs
 	// Overflow interrupt for cycle less than 65536*4µs = 0,262144 s
-	//TIMSK1 |= (1 << TOIE1);			// Turn on overflow interrupt
-	TIMSK1 |= (1 << OCIE1B);			// Turn on compare match B interrupt
+	TIMSK1 |= (1 << TOIE1);			// Turn on overflow interrupt
+	//TIMSK1 |= (1 << TOIE1);			// Turn on compare match B interrupt
 	// Initialize the counter value
 	TCNT1 = 0;									// Zero counter 1
 	// Declare the pin used for the DCI ignition system
-	DDRD |= (1 << PIND4);						// Ignition pin
+	DDRD |= (1 << PIND4) | (1 << PIND5);						// Ignition pin
+	PORTD &= ~(1 << PIND5);
 	PORTD &= ~(1 << PIND4);						// Turn ignition pin off
 	sei(); 	// Turn global interrupts back on
 
@@ -45,8 +46,12 @@ void ign_tab_init()
 			5100,5500,5900,6300,6700,7100,7500,7900,8300,8700,9100};
 
 	float temp_table[MAINTABLE_MAX_RPM_LENGTH] =
-			{-2.0, 8.0,	8.0, 8.0, 8.0, 12.4, 18.3, 24.2, 30.0, 30.0, 30.0, 30.0,
-			30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 26.0, 18.0};
+			{0.0, 8.0,	8.0, 8.0, 8.0, 12.4, 18.3, 24.2, 30.0, 30.0, 30.0, 30.0,
+			30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 26.0, 18.0}; // Byrjaði á -2 breytti 27.3.16 til að testa
+
+	unsigned int temp_dwell[MAINTABLE_MAX_RPM_LENGTH] =
+				{2250, 2250, 2250, 2250, 2250, 2250, 2222, 1935, 1714, 1538, 1395, 1276,
+				1176, 1090, 1016, 952, 895, 845, 800, 759, 722, 689, 659}; // Counts (4µs) 40% duty cycle but max 9 ms
 
 	for(int i = 0; i < table.RPMLength; i++)
 	{
@@ -54,12 +59,14 @@ void ign_tab_init()
 		unsigned long temp = 60000000 / (temp_rpm[i] * 4) ; // in 4µs count values
 		table.Cycle[i] = temp;
 		table.Table[i] = temp_table[i];
+		table.dwell[i] = temp - temp_dwell[i]; // cycle - 40% duty cycle in counts
 	}
 }
 
 // Interrupts with when low signal on crankshaft (60°BTDC)
 ISR(INT1_vect)										//******************
 {
+	PORTD |= (1 << PIND5);
 	engine.rpm_c = TCNT1; 	// Store the latest cycle value
 	TCNT1 = 0; 				// Initialize the cycle counter
 	//println(engine.rpm_c);
@@ -80,8 +87,8 @@ ISR(INT1_vect)										//******************
 		ovf = 0;			// To be implemented later !!!!!!!!!!!!!!!!!!!!
 		return;
 	}*/
-	char lowRPMIndex = 0;
-	char highRPMIndex = table.RPMLength - 1;
+	uint8_t lowRPMIndex = 0;
+	uint8_t highRPMIndex = table.RPMLength - 1;
 	for (unsigned char RPMIndex = 0; RPMIndex < table.RPMLength; RPMIndex++)
 	{
 		if (table.Cycle[RPMIndex] > engine.rpm_c) {
@@ -104,13 +111,19 @@ ISR(INT1_vect)										//******************
 		engine.status = true;
 		degree = (table.Table[highRPMIndex] + table.Table[highRPMIndex]) / 2;
 	}*/
-	unsigned char degree = ((table.Table[highRPMIndex] + table.Table[highRPMIndex]) / 2);
+	unsigned char degree = ((table.Table[highRPMIndex] + table.Table[lowRPMIndex]) / 2);
 	uint16_t calc_counts = (engine.rpm_c / 360) * (CRANK_SIGNAL_ANGLE - degree);
+	TIMSK1 |= (1 << OCIE1A) | (1 << OCIE1B);
 	OCR1B = calc_counts - TCNT1;
-	engine.ign = true;
+	OCR1A = (table.dwell[highRPMIndex] + table.dwell[highRPMIndex]) / 2;
+	//printchar('B');println(OCR1B);
+	//println(TCNT1);
+	//engine.ign = true;
+	PORTD &= ~(1 << PIND5);
 }
 
-ISR(TIMER1_COMPB_vect)
+
+/*ISR(TIMER1_COMPB_vect)
 {
 	if (engine.ign)
 	{
@@ -122,8 +135,23 @@ ISR(TIMER1_COMPB_vect)
 	{
 		PORTD &= ~(1 << PIND4);
 	}
+}*/
+// Time to turn on the ignition
+ISR(TIMER1_COMPA_vect)
+{
+	PORTD |= (1 << PIND4); // Turn on coil
+	TIMSK1 &= ~(1 << OCIE1A);
 }
-
+// Time to SPARK !!
+ISR(TIMER1_COMPB_vect)
+{
+	PORTD &= ~(1 << PIND4); // Spark
+	TIMSK1 &= ~(1 << OCIE1B);
+}
+ISR(TIMER1_OVF_vect)
+{
+	PORTD &= ~(1 << PIND4); // Safety for ignition overheating
+}
 /*ISR(TIMER1_OVF_vect)
 {
 	ovf = 1; 								// over flow occurred

@@ -43,6 +43,7 @@ struct ignition_t
 	unsigned long Cycle[MAINTABLE_MAX_RPM_LENGTH];	// Cycle in µs
 	unsigned char Load[MAINTABLE_MAX_LOAD_LENGTH];  ///< The array of Load (Y) axis values
 	float Table[MAINTABLE_MAX_MAIN_LENGTH]; ///< The table as an array of values
+	unsigned int dwell[MAINTABLE_MAX_RPM_LENGTH];			// dwell time in counts (4µs)
 };
 
 
