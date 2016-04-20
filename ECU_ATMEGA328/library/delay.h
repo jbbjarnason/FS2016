@@ -17,5 +17,6 @@ void delayInit();
 void set_millis(unsigned long set);
 unsigned long read_millis();
 void delayms(unsigned int delay);
+void delayus(unsigned int delay);
 
 #endif /* LIBRARY_DELAY_H_ */

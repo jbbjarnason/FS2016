@@ -14,8 +14,11 @@
 
 void uartInit(uint32_t baud_rate);
 void print(unsigned int data);
-void println(unsigned int data);
-void printchar(char data);
-
+void print_int(unsigned int data);
+void print_long(unsigned long data);
+void print_hex(unsigned long data);
+void print_char(unsigned char data);
+void print_string(char * data);
+void new_line();
 
 #endif /* LIBRARY_UART_H_ */

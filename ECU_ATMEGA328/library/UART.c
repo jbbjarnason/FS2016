@@ -45,17 +45,83 @@ void print(unsigned int data)
 	UDR0 = 32; // whitespace
 }
 
-void println(unsigned int data)
+//Send Integers over to terminal
+void print_int(unsigned int data)
 {
-	print(data);
-	while(!((UCSR0A & 0x20) == 0x20)){ }
-	UDR0 = 10; // new line
+	unsigned int div = 10000;		// Divider to divide data with
+	char start = 0;
+	char cnt = 5;
+	for (int i = 1; i <= cnt; i++)
+	{
+		char send = data / div + 48; // calculate the Ascii for each number
+		if(send != 48 || start == 1 || i == cnt)
+		{
+			//Wait until hardware is ready to send data, UDRE0 = Data register empty
+			print_char(send);
+			start = 1;
+		}
+		data %= div;
+		div /= 10;
+	}
+	new_line();
+}
+//Send Integers over to terminal
+void print_long(unsigned long data)
+{
+	unsigned long div = 1000000000;		// Divider to divide data with
+	char start = 0;
+	char cnt = 10;
+	for (int i = 1; i <= cnt; i++)
+	{
+		char send = data / div + 48; // calculate the Ascii for each number
+		if(send != 48 || start == 1 || i == cnt)
+		{
+			//Wait until hardware is ready to send data, UDRE0 = Data register empty
+			print_char(send);
+			start = 1;
+		}
+		data %= div;
+		div /= 10;
+	}
+	new_line();
+}
+void print_hex(unsigned long data)
+{
+	print_char('0');
+	print_char('x');
+	char start = 0;
+	for (int i = 0; i < 8; i++)
+	{
+		// Shifting every nibble to the least significant nibble to transmit
+		unsigned int send = (data >> (4*(8 - (i + 1)))) & 0xF;
+		if (send != 0 && start == 0)
+			start = 1;				// Start uarting when first nibble is more than zero
+		if (send < 9 && start == 1)
+			print_char(send + 48); 	// send ASCII of numbers 0 - 9
+		else if (start == 1)
+			print_char(send + 55); 	// send ASCII of letter A - F
+	}
+	new_line();
 }
 
-void printchar(char data)
+void print_char(unsigned char data)
 {
-	while(!((UCSR0A & 0x20) == 0x20)){ }
-	UDR0 = data; // new line
-	while(!((UCSR0A & 0x20) == 0x20)){ }
-	UDR0 = 32; // whitespace
+	while(!((UCSR0A & (1 << UDRE0))));
+	UDR0 = data;
+}
+void new_line()
+{
+	while(!((UCSR0A & (1 << UDRE0)) == (1 << UDRE0))){ }
+	UDR0 = 10; // new line
+}
+// Attention the character array needs to end with NULL (0)
+void print_string(char * data)
+{
+	int i = 0;
+	// loop which print strings till null is reached or more than 20 characters (for safety)
+	while(data[i] != 0 || i > 20)
+		print_char(data[i++]);
+	//new_line();
+	while(!((UCSR0A & (1 << UDRE0)) == (1 << UDRE0))){ }
+	UDR0 = 32; // space
 }

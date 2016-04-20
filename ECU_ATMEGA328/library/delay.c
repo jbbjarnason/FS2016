@@ -44,6 +44,12 @@ void delayms(unsigned int delay)
 		}
 	}
 }
+void delayus(unsigned int delay) {
+	for(unsigned int i = 0; i < delay; i++)
+		for(unsigned int j = 0; j < 6; j++)
+			__asm__("nop\n\t");
+}
+
 
 ISR(TIMER2_COMPA_vect)
 {
