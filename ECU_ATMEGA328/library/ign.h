@@ -15,8 +15,8 @@
 #include "global.h"
 #include "UART.h"
 
-void ignInit();
-void ign_tab_init();
+void initIgnition();
+void initIgnTable();
 char ovf; // overflow of cycle timer
 
 volatile struct engine_t engine;

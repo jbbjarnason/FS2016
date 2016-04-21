@@ -15,7 +15,7 @@
 int main(void)
 {
 	uartInit(57600); // baud rate 57k
-	ignInit();
+	initIgnition();
 	print_string("START");
 	new_line();
 

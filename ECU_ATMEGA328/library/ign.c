@@ -11,10 +11,10 @@
 
 unsigned int print_counter = 0;
 
-void ignInit()
+void initIgnition()
 {
 	// Initialize structs
-	ign_tab_init();
+	initIgnTable();
 	engine.rpm_c = 0;
 	engine.status = false;
 	engine.ign = true;
@@ -42,7 +42,7 @@ void ignInit()
 	sei(); 	// Turn global interrupts back on
 
 }
-void ign_tab_init()
+void initIgnTable()
 {
 	table.RPMLength = MAINTABLE_MAX_RPM_LENGTH;
 	table.LoadLength = MAINTABLE_MAX_LOAD_LENGTH;
@@ -130,59 +130,20 @@ ISR(INT1_vect)										//******************
 
 }
 
-
-/*ISR(TIMER1_COMPB_vect)
-{
-	if (engine.ign)
-	{
-		PORTD |= (1 << PIND4);
-		engine.ign = false;
-		OCR1B = TCNT1 + IGN_COUNTS;
-	}
-	else
-	{
-		PORTD &= ~(1 << PIND4);
-	}
-}*/
-// Time to turn on the ignition
+// Turn on coil
 ISR(TIMER1_COMPA_vect)
 {
-	PORTD |= (engine.ign << PIND4); // Turn on coil
-	//TIMSK1 &= ~(1 << OCIE1A);
-	//
-	//new_line();
+	PORTD |= (engine.ign << PIND4);
 }
 // Time to SPARK !!
 ISR(TIMER1_COMPB_vect)
 {
 	PORTD &= ~(1 << PIND4); // Spark
-	//TIMSK1 &= ~(1 << OCIE1B);
-	//print_char('1');
-	//new_line();
 }
+// Safety for ignition overheating
 ISR(TIMER1_OVF_vect)
 {
 	engine.ign = false;
-	//PORTD &= ~(1 << PIND4); // Safety for ignition overheating
-	//print_char('2');
-	//new_line();
 }
-/*ISR(TIMER1_OVF_vect)
-{
-	ovf = 1; 								// over flow occurred
-}*/
-
-//Crank high
-/*ISR(INT0_vect)									//************
-{
-	/*PORTD |= (1 << PIND4);						// Turn on ignition
-	OCR1B = TCNT1 + IGN_TIME;					// Turn off ignition after specified time
-	engine.ign = false;*
-	PORTD |= (1 << PIND4);
-	OCR1B = TCNT1 + IGN_COUNTS;
-	EIMSK &= ~(1 << INT0);						// Disable INT0 interrupt**********
-}
-*/
-
 
 
