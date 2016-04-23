@@ -9,6 +9,7 @@
 #include <UART.h>
 #include <ign.h>
 #include <delay.h>
+#include <adc.h>
 
 
 
@@ -21,6 +22,9 @@ int main(void)
 
 	for (;;)
 	{
+		startADC();
+		print_string("A0"); print_int(sensor_reading[0]);
+		print_string("A1"); print_int(sensor_reading[1]);
 		//println(engine.ign);
 		//printchar('C');
 		//println(engine.rpm_c);
