@@ -17,9 +17,8 @@
 
 void initIgnition();
 void initIgnTable();
-char ovf; // overflow of cycle timer
 
-volatile struct engine_t engine;
+//volatile struct engine_t engine;
 volatile struct ignition_t table;
 
 

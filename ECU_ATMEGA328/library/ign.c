@@ -15,16 +15,14 @@ void initIgnition()
 {
 	// Initialize structs
 	initIgnTable();
-	engine.rpm_c = 0;
-	engine.status = false;
-	engine.ign = true;
+	engine_rpm_c = 0;
+	engine_ign = true;
 
 	cli();	// Turn global interrupts off
 	// Crankshaft interrupt pins
 	EICRA |= (1 << ISC11) | (1 << ISC10);		// Set INT1 to rising edge
-	//EICRA |= (1 << ISC01) | (1 << ISC00);		// Set INT0 to rising edge
 	// Crankshaft Low signal, comes 60° before top dead center
-	EIMSK |= (1 << INT1);						// Enable INT0 interrupt*****************
+	EIMSK |= (1 << INT1);						// Enable INT1 interrupt
 	// Clock to time from crank signal to ignition pulse
 	TCCR1B |= (1 << CS10) | (1 << CS11);		// Prescale to 4µs
 	// Overflow interrupt for cycle less than 65536*4µs = 0,262144 s
@@ -34,10 +32,8 @@ void initIgnition()
 	TCNT1 = 0;									// Zero counter 1
 	OCR1A = 65535;
 	OCR1B = 65535;
-	// Declare the pin used for the DCI ignition system
-	DDRD |= (1 << PIND4) | (1 << PIND5) | (1 << PIND6);						// Ignition pin
-	PORTD &= ~(1 << PIND6);
-	PORTD &= ~(1 << PIND5);
+	// Declare the pin used for the TCI ignition system
+	DDRD |= (1 << PIND4);
 	PORTD &= ~(1 << PIND4);						// Turn ignition pin off
 	sei(); 	// Turn global interrupts back on
 
@@ -75,23 +71,22 @@ void initIgnTable()
 // Interrupts with when low signal on crankshaft (60°BTDC)
 ISR(INT1_vect)										//******************
 {
-	PORTD |= (1 << PIND5);
-	engine.rpm_c = TCNT1; 	// Store the latest cycle value
+	engine_rpm_c = TCNT1; 	// Store the latest cycle value
 	TCNT1 = 0; 				// Initialize the cycle counter
 
-	engine.ign = (engine.rpm_c > REV_LIMIT_COUNTS);
+	engine_ign = (engine_rpm_c > REV_LIMIT_COUNTS);
 
 	uint8_t lowRPMIndex = 0;
 	uint8_t highRPMIndex = table.RPMLength - 1;
 
 	for (uint8_t RPMIndex = 0; RPMIndex < table.RPMLength; RPMIndex++)
 	{
-		if (table.Cycle[RPMIndex] > engine.rpm_c) {
+		if (table.Cycle[RPMIndex] > engine_rpm_c) {
 			lowRPMIndex = RPMIndex;
-		} else if (table.Cycle[RPMIndex] < engine.rpm_c) {
+		} else if (table.Cycle[RPMIndex] < engine_rpm_c) {
 			highRPMIndex = RPMIndex;
 			break;
-		} else if (table.Cycle[RPMIndex] == engine.rpm_c) {
+		} else if (table.Cycle[RPMIndex] == engine_rpm_c) {
 			lowRPMIndex = RPMIndex;
 			highRPMIndex = RPMIndex;
 			break;
@@ -100,24 +95,24 @@ ISR(INT1_vect)										//******************
 
 	unsigned char degree = ((table.Table[highRPMIndex] + table.Table[lowRPMIndex]) / 2);
 	// calculate counts for compare match B to SPARK !
-	uint16_t calc_counts = (engine.rpm_c / 360) * (CRANK_SIGNAL_ANGLE - degree);
+	uint16_t calc_counts = (engine_rpm_c / 360) * (CRANK_SIGNAL_ANGLE - degree);
 	OCR1B = calc_counts; //- TCNT1;
 	// calculate count for compare match A to turn on the ignition coil
-	uint32_t calc_dwell = ((long)engine.rpm_c * ((table.dwell[highRPMIndex] + table.dwell[lowRPMIndex]) / 2)) / 100;
+	uint32_t calc_dwell = ((long)engine_rpm_c * ((table.dwell[highRPMIndex] + table.dwell[lowRPMIndex]) / 2)) / 100;
 	print_counter++;
 	if (OCR1B > MAX_DWELL_TIME) { // is the SPARK delay time more then maximum dwell time 9 ms ?
 		OCR1A = OCR1B - MAX_DWELL_TIME;
 	} else if (calc_dwell > MAX_DWELL_TIME) { // is the calculated dwell time to long ?
-		OCR1A = engine.rpm_c - MAX_DWELL_TIME + OCR1B;
+		OCR1A = engine_rpm_c - MAX_DWELL_TIME + OCR1B;
 	} else { // use the calculated dwell time
-		OCR1A = engine.rpm_c - calc_dwell + OCR1B;
+		OCR1A = engine_rpm_c - calc_dwell + OCR1B;
 	}
-	//unsigned long dwell_delay = engine.rpm_c - ((4 * (long)engine.rpm_c) / 10);
+	//unsigned long dwell_delay = engine_rpm_c - ((4 * (long)engine_rpm_c) / 10);
 	//OCR1A = (unsigned int) dwell_delay;
 
 	/*if (print_counter > 100)
 	{
-		print_char('R'); print_int(engine.rpm_c);
+		print_char('R'); print_int(engine_rpm_c);
 		print_char('A'); print_int(OCR1A);
 		print_char('B'); print_int(OCR1B);
 		print_char('T'); print_int(TIMSK1);
@@ -126,14 +121,15 @@ ISR(INT1_vect)										//******************
 		print_string("high"); print_int(highRPMIndex);
 		print_counter = 0;
 	}*/
-	PORTD &= ~(1 << PIND5);
-
 }
 
 // Turn on coil
 ISR(TIMER1_COMPA_vect)
 {
-	PORTD |= (engine.ign << PIND4);
+	if (engine_ign)
+		PORTD |= (1 << PIND4);
+	else
+		PORTD &= ~(1 << PIND4);
 }
 // Time to SPARK !!
 ISR(TIMER1_COMPB_vect)
@@ -143,7 +139,7 @@ ISR(TIMER1_COMPB_vect)
 // Safety for ignition overheating
 ISR(TIMER1_OVF_vect)
 {
-	engine.ign = false;
+	engine_ign = false;
 }
 
 

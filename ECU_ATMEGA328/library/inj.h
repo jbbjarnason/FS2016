@@ -8,6 +8,15 @@
 #ifndef LIBRARY_INJ_H_
 #define LIBRARY_INJ_H_
 
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include "UART.h"
+#include "global.h"
+#include "ign.h"
+
+void initInjection();
+
+
 
 
 #endif /* LIBRARY_INJ_H_ */
