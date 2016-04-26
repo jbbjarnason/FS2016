@@ -61,7 +61,20 @@ void initIgnTable()
 	IGN[0][0] = 50;  IGN[0][1] = 100; IGN[0][2] = 240; IGN[0][3] = 278; IGN[0][4] = 278; IGN[0][5] = 278; IGN[0][6] = 278; IGN[0][7] = 278;
 
 	DWELL[0] = 40; DWELL[1] = 40; DWELL[2] = 40; DWELL[3] = 40; DWELL[4] = 40; DWELL[5] = 40; DWELL[6] = 40; DWELL[7] = 40;
-	table.RPMLength = MAINTABLE_MAX_RPM_LENGTH;
+
+	/* kPa
+		 * 101
+		 * 90
+		 * 80
+		 * 68
+		 * 58
+		 * 46
+		 * 36
+		 * 25
+		 *///1500, 1600, 2700, 3700, 4800, 5900, 7000, 9100 RPM
+
+
+	/*table.RPMLength = MAINTABLE_MAX_RPM_LENGTH;
 	table.LoadLength = MAINTABLE_MAX_LOAD_LENGTH;
 
 	unsigned int temp_rpm_ign[MAINTABLE_MAX_RPM_LENGTH] =
@@ -86,7 +99,7 @@ void initIgnTable()
 		print_string("RPM");print_int(temp_rpm_ign[i]);
 		print_string("CycleCounts");print_long(temp);
 		print_string("DwellDutyCycle"); print_int(temp_dwell[i]);
-	}
+	}*/
 }
 
 // Interrupts on low signal on crankshaft (60°BTDC)
