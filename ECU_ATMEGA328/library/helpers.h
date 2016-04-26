@@ -15,6 +15,7 @@
 uint8_t interpolation(uint16_t value, uint16_t x1, uint16_t x2);
 //uint8_t average(uint8_t vector[], uint8_t length);
 uint8_t median(uint8_t array[], uint8_t length);
+uint16_t lookup_table(uint16_t table[], uint8_t max_length, uint16_t compare);
 
 
 #endif /* LIBRARY_HELPERS_H_ */

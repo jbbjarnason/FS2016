@@ -47,14 +47,20 @@ void initGlobalVariables();
 
 uint8_t lowMAPindex;						// The length of MAP axis
 uint8_t highMAPindex;
-uint8_t lowRPMindex;
-uint8_t lowRPMindex;
+uint8_t lowRPMindexIgn;
+uint8_t highRPMindexIgn;
+uint8_t lowRPMindexInj;
+uint8_t highRPMindexInj;
+uint8_t p_ign;									// interpolation of RPM
+uint8_t p_inj;
+uint8_t q;									// interpolation of MAP
 uint16_t IGN[MAX_RPM_TABLE_LENGTH][MAX_LOAD_TABLE_LENGTH]; 	// ignition table
 uint8_t VE[MAX_RPM_TABLE_LENGTH][MAX_LOAD_TABLE_LENGTH]; 	// volumetric efficiency table
 uint8_t AFR[MAX_RPM_TABLE_LENGTH][MAX_LOAD_TABLE_LENGTH]; 	// air to fuel ratio table
 uint16_t RPM_INJ_C[MAX_RPM_TABLE_LENGTH];					// RPM vector for Injection in 4µs counts
 uint16_t RPM_IGN_C[MAX_RPM_TABLE_LENGTH];					// RPM vector for Ignition in 4µs counts
 uint8_t LOAD[MAX_LOAD_TABLE_LENGTH];						// Load vector of MAP values in kPa
+uint8_t DWELL[MAX_RPM_TABLE_LENGTH];						// Dwell duty cycle vector
 
 uint16_t engine_rpm_c;						// RPM cycle in 4µs (counter values)
 uint8_t engine_status;						// Is the engine on (1 On, 0 off)
@@ -63,6 +69,7 @@ uint8_t engine_inj;							// Is time to turn on the injection
 uint16_t engine_MAP;						// Minimum average of values from the MAP sensor
 uint8_t engine_minMapAve[MAP_AVERAGE_COUNTS]; // Measured values from the MAP sensor
 uint8_t engine_minMAP;						// Minimum of average values, when intake valve is fully open
+uint8_t engine_kpa;							// MAP sensor value in kPa
 
 uint8_t new_rpm;							// Boolean to calculate new indexes for new rpm in mapping arrays
 uint8_t second_rpm;							// Boolean to calculate new MAP index

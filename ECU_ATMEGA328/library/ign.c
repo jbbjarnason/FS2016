@@ -59,6 +59,8 @@ void initIgnTable()
 	IGN[2][0] = 130; IGN[2][1] = 100; IGN[2][2] = 255; IGN[2][3] = 296; IGN[2][4] = 296; IGN[2][5] = 296; IGN[2][6] = 296; IGN[2][7] = 296;
 	IGN[1][0] = 130; IGN[1][1] = 100; IGN[1][2] = 248; IGN[1][3] = 287; IGN[1][4] = 287; IGN[1][5] = 287; IGN[1][6] = 287; IGN[1][7] = 287;
 	IGN[0][0] = 50;  IGN[0][1] = 100; IGN[0][2] = 240; IGN[0][3] = 278; IGN[0][4] = 278; IGN[0][5] = 278; IGN[0][6] = 278; IGN[0][7] = 278;
+
+	DWELL[0] = 40; DWELL[1] = 40; DWELL[2] = 40; DWELL[3] = 40; DWELL[4] = 40; DWELL[5] = 40; DWELL[6] = 40; DWELL[7] = 40;
 	table.RPMLength = MAINTABLE_MAX_RPM_LENGTH;
 	table.LoadLength = MAINTABLE_MAX_LOAD_LENGTH;
 
@@ -95,32 +97,44 @@ ISR(INT1_vect)										//******************
 
 	new_rpm = true;			// Boolean used to indicate new_rpm which calculates new mapping values (main loop)
 
+	uint32_t degree = (((long)IGN[lowRPMindexIgn][lowMAPindex] * (100 - p_ign) * (100 - q)) +
+					((long)IGN[highRPMindexIgn][lowMAPindex] * p_ign * (100 - q)) +
+					((long)IGN[lowRPMindexIgn][highMAPindex] * (100 - p_ign) * q) +
+					((long)IGN[highRPMindexIgn][highMAPindex] * p_ign * q)) / 100000;
+	/*print_char('D'); print_int(degree);
+	print_char('1'); print_int(IGN[lowRPMindexIgn][lowMAPindex]/10);
+	print_char('2'); print_int(IGN[highRPMindexIgn][lowMAPindex]/10);
+	print_char('3'); print_int(IGN[lowRPMindexIgn][highMAPindex]/10);
+	print_char('4'); print_int(IGN[highRPMindexIgn][highMAPindex]/10);*/
 	engine_ign = (engine_rpm_c > REV_LIMIT_COUNTS);
 
-	uint8_t lowRPMIndex = 0;
-	uint8_t highRPMIndex = table.RPMLength - 1;
-
+	/*uint8_t lowRPMIndex1 = 0;
+	uint8_t highRPMIndex1 = table.RPMLength - 1;
+	//print_char('C');print_int(engine_rpm_c);
 	for (uint8_t RPMIndex = 0; RPMIndex < table.RPMLength; RPMIndex++)
 	{
 		if (table.Cycle[RPMIndex] > engine_rpm_c) {
-			lowRPMIndex = RPMIndex;
+			lowRPMIndex1 = RPMIndex;
 		} else if (table.Cycle[RPMIndex] < engine_rpm_c) {
-			highRPMIndex = RPMIndex;
+			highRPMIndex1 = RPMIndex;
 			break;
 		} else if (table.Cycle[RPMIndex] == engine_rpm_c) {
-			lowRPMIndex = RPMIndex;
-			highRPMIndex = RPMIndex;
+			lowRPMIndex1 = RPMIndex;
+			highRPMIndex1 = RPMIndex;
 			break;
 		}
 	}
 
-	unsigned char degree = ((table.Table[highRPMIndex] + table.Table[lowRPMIndex]) / 2);
+	unsigned char degree1 = ((table.Table[highRPMIndex1] + table.Table[lowRPMIndex1]) / 2);*/
+	//print_char('d'); print_int(degree1);
 	// calculate counts for compare match B to SPARK !
 	uint16_t calc_counts = (engine_rpm_c / 360) * (CRANK_SIGNAL_ANGLE - degree);
 	OCR1B = calc_counts; //- TCNT1;
 	// calculate count for compare match A to turn on the ignition coil
-	uint32_t calc_dwell = ((long)engine_rpm_c * ((table.dwell[highRPMIndex] + table.dwell[lowRPMIndex]) / 2)) / 100;
-
+	//uint32_t calc_dwell = ((long)engine_rpm_c * ((table.dwell[highRPMIndex1] + table.dwell[lowRPMIndex1]) / 2)) / 100;
+	uint32_t calc_dwell = ((long)engine_rpm_c * ((DWELL[lowRPMindexIgn] + DWELL[highRPMindexIgn]) / 2)) / 100;
+	//print_char('H'); print_int(highRPMIndex1);
+	//print_char('L'); print_int(lowRPMIndex1);
 	if (OCR1B > MAX_DWELL_TIME) { // is the SPARK delay time more then maximum dwell time 9 ms ?
 		OCR1A = OCR1B - MAX_DWELL_TIME;
 	} else if (calc_dwell > MAX_DWELL_TIME) { // is the calculated dwell time to long ?

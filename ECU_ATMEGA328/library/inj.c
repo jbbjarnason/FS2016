@@ -16,6 +16,9 @@ void initInjTable()
 		//print_string("INJ"); print_int(RPM_INJ_C[i]);
 	}
 
+	// Initialize load vector
+	LOAD[0] = 25;LOAD[1] = 36;LOAD[2] = 46;LOAD[3] = 58;LOAD[4] = 68;LOAD[5] = 80;LOAD[6] = 90;LOAD[7] = 101;
+
 	// Initializing Volumetric efficiency table
 	VE[7][0] = 29; VE[7][1] = 29; VE[7][2] = 29; VE[7][3] = 100; VE[7][4] = 100; VE[7][5] = 96; VE[7][6] = 91; VE[7][7] = 87;
 	VE[6][0] = 29; VE[6][1] = 29; VE[6][2] = 29; VE[6][3] = 96; VE[6][4] = 96; VE[6][5] = 92; VE[6][6] = 87; VE[6][7] = 83;

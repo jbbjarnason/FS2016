@@ -43,3 +43,23 @@ uint8_t median(uint8_t array[], uint8_t length)
 	// return median
 	return array[length / 2];
 }
+
+uint16_t lookup_table(uint16_t table[], uint8_t max_length, uint16_t compare)
+{
+	uint8_t lowindex = 0;
+	uint8_t highindex = max_length - 1;
+	for (uint8_t Index = 0; Index < max_length; Index++)
+	{
+		if (table[Index] > compare) {
+			lowindex = Index;
+		} else if (table[Index] < compare) {
+			highindex = Index;
+			break;
+		} else if (table[Index] == compare) {
+			lowindex = Index;
+			highindex = Index;
+			break;
+		}
+	}
+	return lowindex | (highindex << 8);
+}
