@@ -15,6 +15,7 @@
 #include "ign.h"
 
 void initInjection();
+void initInjTable();
 
 
 

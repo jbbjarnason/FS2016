@@ -35,15 +35,34 @@ void initIgnition()
 	// Declare the pin used for the TCI ignition system
 	DDRD |= (1 << PIND4);
 	PORTD &= ~(1 << PIND4);						// Turn ignition pin off
+
+	// initialize boolean of new rpm value
+	//new_rpm = true;
 	sei(); 	// Turn global interrupts back on
 
 }
 void initIgnTable()
 {
+	// New ignition RPM vector
+	// Initialize RPM vector
+	uint8_t temp_rpm[MAX_RPM_TABLE_LENGTH] = {15, 16, 27, 37, 48, 59, 70, 91}; // temporary rpm vector, expressed in RPM / 100
+	for (uint8_t i = 0; i < MAX_RPM_TABLE_LENGTH; i++){
+		RPM_IGN_C[i] = 600000 / ((long)temp_rpm[i] * TIMER1_US_CONST);
+		print_string("IGN"); print_int(RPM_IGN_C[i]);
+	}
+	// NEW ignition table 25.4.16 , NEED TO divide degrees with 10, store 8.0° as 80°, int instead of float
+	IGN[7][0] = 130; IGN[7][1] = 100; IGN[7][2] = 294; IGN[7][3] = 341; IGN[7][4] = 341; IGN[7][5] = 341; IGN[7][6] = 341; IGN[7][7] = 341;
+	IGN[6][0] = 130; IGN[6][1] = 100; IGN[6][2] = 286; IGN[6][3] = 332; IGN[6][4] = 332; IGN[6][5] = 332; IGN[6][6] = 332; IGN[6][7] = 332;
+	IGN[5][0] = 130; IGN[5][1] = 100; IGN[5][2] = 279; IGN[5][3] = 323; IGN[5][4] = 323; IGN[5][5] = 323; IGN[5][6] = 323; IGN[5][7] = 323;
+	IGN[4][0] = 130; IGN[4][1] = 100; IGN[4][2] = 271; IGN[4][3] = 314; IGN[4][4] = 314; IGN[4][5] = 314; IGN[4][6] = 314; IGN[4][7] = 314;
+	IGN[3][0] = 130; IGN[3][1] = 100; IGN[3][2] = 263; IGN[3][3] = 305; IGN[3][4] = 305; IGN[3][5] = 305; IGN[3][6] = 305; IGN[3][7] = 305;
+	IGN[2][0] = 130; IGN[2][1] = 100; IGN[2][2] = 255; IGN[2][3] = 296; IGN[2][4] = 296; IGN[2][5] = 296; IGN[2][6] = 296; IGN[2][7] = 296;
+	IGN[1][0] = 130; IGN[1][1] = 100; IGN[1][2] = 248; IGN[1][3] = 287; IGN[1][4] = 287; IGN[1][5] = 287; IGN[1][6] = 287; IGN[1][7] = 287;
+	IGN[0][0] = 50;  IGN[0][1] = 100; IGN[0][2] = 240; IGN[0][3] = 278; IGN[0][4] = 278; IGN[0][5] = 278; IGN[0][6] = 278; IGN[0][7] = 278;
 	table.RPMLength = MAINTABLE_MAX_RPM_LENGTH;
 	table.LoadLength = MAINTABLE_MAX_LOAD_LENGTH;
 
-	unsigned int temp_rpm[MAINTABLE_MAX_RPM_LENGTH] =
+	unsigned int temp_rpm_ign[MAINTABLE_MAX_RPM_LENGTH] =
 			{ 500,700,1100,1500,1900,2300,2700,3100,3500,3900,4300,4700,
 			5100,5500,5900,6300,6700,7100,7500,7900,8300,8700,9100};
 
@@ -51,28 +70,30 @@ void initIgnTable()
 			{0.0, 8.0,	8.0, 8.0, 8.0, 12.4, 18.3, 24.2, 30.0, 30.0, 30.0, 30.0,
 			30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 26.0, 18.0}; // Byrjaði á -2 breytti 27.3.16 til að testa
 
-	unsigned int temp_dwell[MAINTABLE_MAX_RPM_LENGTH] =
+	uint8_t temp_dwell[MAINTABLE_MAX_RPM_LENGTH] =
 				{40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40,
 				40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40}; // duty cycle in %, 40%
 
 	for(int i = 0; i < table.RPMLength; i++)
 	{
-		table.RPM[i] = temp_rpm[i];
-		unsigned long temp = 60000000 / ((long)temp_rpm[i] * 4) ; // in 4µs count values
+		table.RPM[i] = temp_rpm_ign[i];
+		unsigned long temp = 60000000 / ((long)temp_rpm_ign[i] * TIMER1_US_CONST) ; // in 4µs count values
 		table.Cycle[i] = temp;
 		table.Table[i] = temp_table[i];
 		table.dwell[i] = temp_dwell[i]; // cycle - 40% duty cycle in counts
-		print_string("RPM");print_int(temp_rpm[i]);
+		print_string("RPM");print_int(temp_rpm_ign[i]);
 		print_string("CycleCounts");print_long(temp);
 		print_string("DwellDutyCycle"); print_int(temp_dwell[i]);
 	}
 }
 
-// Interrupts with when low signal on crankshaft (60°BTDC)
+// Interrupts on low signal on crankshaft (60°BTDC)
 ISR(INT1_vect)										//******************
 {
 	engine_rpm_c = TCNT1; 	// Store the latest cycle value
 	TCNT1 = 0; 				// Initialize the cycle counter
+
+	new_rpm = true;			// Boolean used to indicate new_rpm which calculates new mapping values (main loop)
 
 	engine_ign = (engine_rpm_c > REV_LIMIT_COUNTS);
 
@@ -99,7 +120,7 @@ ISR(INT1_vect)										//******************
 	OCR1B = calc_counts; //- TCNT1;
 	// calculate count for compare match A to turn on the ignition coil
 	uint32_t calc_dwell = ((long)engine_rpm_c * ((table.dwell[highRPMIndex] + table.dwell[lowRPMIndex]) / 2)) / 100;
-	print_counter++;
+
 	if (OCR1B > MAX_DWELL_TIME) { // is the SPARK delay time more then maximum dwell time 9 ms ?
 		OCR1A = OCR1B - MAX_DWELL_TIME;
 	} else if (calc_dwell > MAX_DWELL_TIME) { // is the calculated dwell time to long ?
@@ -110,7 +131,8 @@ ISR(INT1_vect)										//******************
 	//unsigned long dwell_delay = engine_rpm_c - ((4 * (long)engine_rpm_c) / 10);
 	//OCR1A = (unsigned int) dwell_delay;
 
-	/*if (print_counter > 100)
+	/*print_counter++;
+	 * if (print_counter > 100)
 	{
 		print_char('R'); print_int(engine_rpm_c);
 		print_char('A'); print_int(OCR1A);
@@ -126,6 +148,7 @@ ISR(INT1_vect)										//******************
 // Turn on coil
 ISR(TIMER1_COMPA_vect)
 {
+
 	if (engine_ign)
 		PORTD |= (1 << PIND4);
 	else
@@ -136,7 +159,7 @@ ISR(TIMER1_COMPB_vect)
 {
 	PORTD &= ~(1 << PIND4); // Spark
 }
-// Safety for ignition overheating
+// Safety for ignition coil overheating
 ISR(TIMER1_OVF_vect)
 {
 	engine_ign = false;

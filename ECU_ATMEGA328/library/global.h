@@ -8,6 +8,15 @@
 #ifndef LIBRARY_GLOBAL_H_
 #define LIBRARY_GLOBAL_H_
 
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+void initGlobalVariables();
+
+// DEFINE PIN NUMBERS
+#define WB_PIN 0
+#define MAP_PIN 7
+
 #define MAINTABLE_MAX_RPM_LENGTH		23
 #define MAINTABLE_MAX_LOAD_LENGTH		1
 #define MAINTABLE_MAX_MAIN_LENGTH		300
@@ -40,15 +49,23 @@ uint8_t lowMAPindex;						// The length of MAP axis
 uint8_t highMAPindex;
 uint8_t lowRPMindex;
 uint8_t lowRPMindex;
-uint8_t IGN_TABLE[MAX_RPM_TABLE_LENGTH][MAX_LOAD_TABLE_LENGTH];
-uint16_t VE_TABLE[MAX_RPM_TABLE_LENGTH][MAX_LOAD_TABLE_LENGTH];
-uint16_t AFR_TABLE[MAX_RPM_TABLE_LENGTH][MAX_LOAD_TABLE_LENGTH];
+uint16_t IGN[MAX_RPM_TABLE_LENGTH][MAX_LOAD_TABLE_LENGTH]; 	// ignition table
+uint8_t VE[MAX_RPM_TABLE_LENGTH][MAX_LOAD_TABLE_LENGTH]; 	// volumetric efficiency table
+uint8_t AFR[MAX_RPM_TABLE_LENGTH][MAX_LOAD_TABLE_LENGTH]; 	// air to fuel ratio table
+uint16_t RPM_INJ_C[MAX_RPM_TABLE_LENGTH];					// RPM vector for Injection in 4µs counts
+uint16_t RPM_IGN_C[MAX_RPM_TABLE_LENGTH];					// RPM vector for Ignition in 4µs counts
+uint8_t LOAD[MAX_LOAD_TABLE_LENGTH];						// Load vector of MAP values in kPa
 
 uint16_t engine_rpm_c;						// RPM cycle in 4µs (counter values)
 uint8_t engine_status;						// Is the engine on (1 On, 0 off)
 uint8_t engine_ign;							// Is time to spark (1 On, 0 off) /*********UNNESSASARY **********/
 uint8_t engine_inj;							// Is time to turn on the injection
-uint16_t engine_MAP;						// Average of values from the MAP sensor
+uint16_t engine_MAP;						// Minimum average of values from the MAP sensor
+uint8_t engine_minMapAve[MAP_AVERAGE_COUNTS]; // Measured values from the MAP sensor
+uint8_t engine_minMAP;						// Minimum of average values, when intake valve is fully open
+
+uint8_t new_rpm;							// Boolean to calculate new indexes for new rpm in mapping arrays
+uint8_t second_rpm;							// Boolean to calculate new MAP index
 
 /*struct engine_t
 {

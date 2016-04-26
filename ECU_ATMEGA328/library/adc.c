@@ -16,7 +16,7 @@ void startADC()
 {
 	// ADC Multiplexer Selection Register
 	// Using Internal AVcc with external capacitor at aref pin,
-	//highest 8 bits are in one register ADCH, analog pin 0 enabled
+	// highest 8 bits are in one register ADCH, analog pin 0 enabled
 	ADMUX = (1 << REFS0) | (1 << ADLAR);
 	// ADC Control and Status Register A
 	// ADC enable, Prescale clock by division of 128, adc interrupt enable, ADC start conversion
@@ -30,17 +30,16 @@ void startADC()
 }
 uint8_t readADC(uint8_t pin)
 {
-	// initialize adc
-	ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
 	// Make the highest 8 bits in register ADCH (ADLAR)
 	ADMUX = (1 << REFS0) | (1 << ADLAR) | (pin & 0x07);
-	// Start measurement
-	ADCSRA |= (1 << ADSC);
+	// initialize adc and start measurement
+	ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0) | (1 << ADSC);
 	// Wait for the ADC conversion to complete
 	while (!(ADCSRA & (1 << ADIF)));
 	// Clear the end of conversion flag
 	ADCSRA |= (1 << ADIF);
-	return ADCH;
+	uint8_t read = ADCH;
+	return read;
 }
 // ADC conversion complete interrupt
 ISR(ADC_vect)

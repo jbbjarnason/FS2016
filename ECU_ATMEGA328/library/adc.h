@@ -10,6 +10,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include "global.h"
 #define ADC_CHANNELS 5
 
 void initSensors();
