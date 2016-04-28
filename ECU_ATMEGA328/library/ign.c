@@ -24,10 +24,9 @@ void initIgnition()
 	// Crankshaft Low signal, comes 60° before top dead center
 	EIMSK |= (1 << INT1);						// Enable INT1 interrupt
 	// Clock to time from crank signal to ignition pulse
-	TCCR1B |= (1 << CS10) | (1 << CS11);		// Prescale to 4µs
+	TCCR1B = (1 << CS10) | (1 << CS11);		// Prescale to 4µs
 	// Overflow interrupt for cycle less than 65536*4µs = 0,262144 s
-	TIMSK1 |= (1 << TOIE1);			// Turn on overflow interrupt
-	TIMSK1 |= (1 << OCIE1A) | (1 << OCIE1B); // Turn on compare match B interrupt
+	TIMSK1 = (1 << OCIE1A) | (1 << OCIE1B) | (1 << TOIE1); // Turn on compare match B interrupt
 	// Initialize the counter value
 	TCNT1 = 0;									// Zero counter 1
 	OCR1A = 65535;
@@ -110,10 +109,10 @@ ISR(INT1_vect)										//******************
 
 	new_rpm = true;			// Boolean used to indicate new_rpm which calculates new mapping values (main loop)
 
-	uint32_t degree = (((long)IGN[lowRPMindexIgn][lowMAPindex] * (100 - p_ign) * (100 - q)) +
-					((long)IGN[highRPMindexIgn][lowMAPindex] * p_ign * (100 - q)) +
-					((long)IGN[lowRPMindexIgn][highMAPindex] * (100 - p_ign) * q) +
-					((long)IGN[highRPMindexIgn][highMAPindex] * p_ign * q)) / 100000;
+	uint32_t degree = (((long)IGN[lowMAPindex][lowRPMindexIgn] * (100 - p_ign) * (100 - q)) +
+					((long)IGN[lowMAPindex][highRPMindexIgn] * p_ign * (100 - q)) +
+					((long)IGN[highMAPindex][lowRPMindexIgn] * (100 - p_ign) * q) +
+					((long)IGN[highMAPindex][highRPMindexIgn] * p_ign * q)) / 100000;
 	/*print_char('D'); print_int(degree);
 	print_char('1'); print_int(IGN[lowRPMindexIgn][lowMAPindex]/10);
 	print_char('2'); print_int(IGN[highRPMindexIgn][lowMAPindex]/10);

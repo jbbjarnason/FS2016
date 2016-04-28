@@ -30,6 +30,7 @@ void initGlobalVariables();
 #endif
 
 #define TIMER1_US_CONST			4		// Timer 1 prescaled to 4 탎
+#define TIMER0_US_CONST			64		// Timer 0 prescaled to 64 탎
 //#define STARTING_RPM			500
 //#define STARTING_COUNTS			60000 / STARTING_RPM * 1000 / 4
 //#define IGN_COUNTS				250		// Spark for 250 counts * 4 탎 = 1ms
@@ -42,6 +43,15 @@ void initGlobalVariables();
 
 #define MAX_RPM_TABLE_LENGTH			8
 #define MAX_LOAD_TABLE_LENGTH			8
+
+#define INJECTOR_OPENING_TIME			1000 		// injector opening time in 탎, 1000탎 = 1ms
+#define INTAKE_VALVE_DEGREES			45			// Intake valve fully open in degrees
+
+#define ENGINE_CC						500			// 500 cc polaris motor
+
+#define PULSE_DIVIDE					2			// number of injector pulses one round of the camshaft
+#define NR_OF_INJ_PER_CYL				2			// number of injector per cylender
+#define INJ_SIZE						5860		// Injector size 5860 mg/s
 
 
 
@@ -62,14 +72,16 @@ uint16_t RPM_IGN_C[MAX_RPM_TABLE_LENGTH];					// RPM vector for Ignition in 4탎 
 uint8_t LOAD[MAX_LOAD_TABLE_LENGTH];						// Load vector of MAP values in kPa
 uint8_t DWELL[MAX_RPM_TABLE_LENGTH];						// Dwell duty cycle vector
 
-uint16_t engine_rpm_c;						// RPM cycle in 4탎 (counter values)
-uint8_t engine_status;						// Is the engine on (1 On, 0 off)
-uint8_t engine_ign;							// Is time to spark (1 On, 0 off) /*********UNNESSASARY **********/
-uint8_t engine_inj;							// Is time to turn on the injection
-uint16_t engine_MAP;						// Minimum average of values from the MAP sensor
-uint8_t engine_minMapAve[MAP_AVERAGE_COUNTS]; // Measured values from the MAP sensor
-uint8_t engine_minMAP;						// Minimum of average values, when intake valve is fully open
-uint8_t engine_kpa;							// MAP sensor value in kPa
+volatile uint16_t engine_rpm_c;						// RPM cycle in 4탎 (counter values)
+volatile uint8_t engine_status;						// Is the engine on (1 On, 0 off)
+volatile uint8_t engine_ign;							// Is time to spark (1 On, 0 off) /*********UNNESSASARY **********/
+volatile uint8_t engine_inj;							// Is time to turn on the injection
+volatile uint16_t engine_MAP;						// Minimum average of values from the MAP sensor in kpa
+volatile uint8_t engine_minMapAve[MAP_AVERAGE_COUNTS]; // Measured values from the MAP sensor
+volatile uint8_t engine_minMAP;						// Minimum of average values, when intake valve is fully open
+volatile uint8_t engine_kpa;							// MAP sensor value in kPa
+volatile uint8_t engine_iat;							// Intake air temperature
+
 
 uint8_t new_rpm;							// Boolean to calculate new indexes for new rpm in mapping arrays
 uint8_t second_rpm;							// Boolean to calculate new MAP index
@@ -83,7 +95,7 @@ uint8_t second_rpm;							// Boolean to calculate new MAP index
 	uint16_t MAP;					// Average of minimum values from
 };*/
 
-struct ignition_t
+/*struct ignition_t
 {
 	unsigned char RPMLength;                        ///< The length of the RPM axis array
 	unsigned char LoadLength;                       ///< The length of the Load axis array
@@ -92,7 +104,7 @@ struct ignition_t
 	unsigned char Load[MAINTABLE_MAX_LOAD_LENGTH];  ///< The array of Load (Y) axis values
 	float Table[MAINTABLE_MAX_MAIN_LENGTH]; ///< The table as an array of values
 	unsigned int dwell[MAINTABLE_MAX_RPM_LENGTH];			// dwell time in counts (4탎)
-};
+};*/
 
 
 #endif /* LIBRARY_GLOBAL_H_ */

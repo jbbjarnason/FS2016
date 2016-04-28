@@ -11,5 +11,7 @@ void initGlobalVariables()
 	engine_MAP = 0;
 	second_rpm = false;
 	engine_minMAP = 255;
+	engine_MAP = 0;
+	engine_iat = 20;
 }
 

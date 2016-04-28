@@ -21,9 +21,10 @@ uint8_t average(uint8_t vector[], uint8_t length)
 	uint16_t sum = 0;
 	for (uint8_t i = 0; i < length; i++)
 		sum += vector[i];
-	print_char('s'); print_int(sum);
+	//print_char('s'); print_int(sum);
 	return sum / length;
 }
+
 
 
 int main(void)
@@ -106,10 +107,10 @@ int main(void)
 			//lookup_table(&lowRPMindex, &highRPMindex, RPM_IGN_C, MAX_RPM_TABLE_LENGTH, engine_rpm_c);
 			// Check the weight of the current RPM compared to the array in scale 0-100%
 
-			print_string("low"); print_int(RPM_IGN_C[lowRPMindexIgn]);
-			print_string("high"); print_int(RPM_IGN_C[highRPMindexIgn]);
-			print_string("cur"); print_int(engine_rpm_c);
-			print_char('p'); print_int(p_ign);
+			//print_string("low"); print_int(RPM_IGN_C[lowRPMindexIgn]);
+			//print_string("high"); print_int(RPM_IGN_C[highRPMindexIgn]);
+			//print_string("cur"); print_int(engine_rpm_c);
+			//print_char('p'); print_int(p_ign);
 
 			PORTB ^= (1 << PINB3);
 			// if second rpm value arrives is calculated new index for load in the mapping tables
@@ -122,7 +123,8 @@ int main(void)
 				//indexes = lookup_table(LOAD, MAX_LOAD_TABLE_LENGTH, temp_kpa);
 				//lowMAPindex = indexes & 0xFF;
 				//highMAPindex = (indexes >> 8);
-
+				//print_string("MAP"); print_int(temp_kpa);
+				engine_MAP = temp_kpa;
 
 
 
@@ -145,13 +147,14 @@ int main(void)
 
 				q = interpolation(temp_kpa, LOAD[lowMAPindex], LOAD[highMAPindex]);
 
-				print_char('q');print_int(q);
-				print_char('L');print_int(LOAD[lowMAPindex]);
-				print_char('H');print_int(LOAD[highMAPindex]);
+				//print_char('q');print_int(q);
+				//print_char('L');print_int(LOAD[lowMAPindex]);
+				//print_char('H');print_int(LOAD[highMAPindex]);
 
-				print_string("kpa"); print_int(temp_kpa);
+				//print_string("kpa"); print_int(temp_kpa);
 				PORTB ^= (1 << PINB4);
-				print_int(engine_minMAP);
+				//print_int(engine_minMAP);
+
 				engine_minMAP = 255;
 			}
 			second_rpm = !second_rpm;

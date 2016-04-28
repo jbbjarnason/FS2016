@@ -19,7 +19,7 @@ void initIgnition();
 void initIgnTable();
 
 //volatile struct engine_t engine;
-volatile struct ignition_t table;
+//volatile struct ignition_t table;
 
 
 
