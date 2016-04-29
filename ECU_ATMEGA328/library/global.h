@@ -44,7 +44,7 @@ void initGlobalVariables();
 #define MAX_RPM_TABLE_LENGTH			8
 #define MAX_LOAD_TABLE_LENGTH			8
 
-#define INJECTOR_OPENING_TIME			1000 		// injector opening time in 탎, 1000탎 = 1ms
+#define INJECTOR_OPENING_TIME			1400 		// injector opening time in 탎, 1000탎 = 1ms
 #define INTAKE_VALVE_DEGREES			45			// Intake valve fully open in degrees
 
 #define ENGINE_CC						500			// 500 cc polaris motor
