@@ -9,15 +9,8 @@
 
 void initInjTable()
 {
-	// Initialize RPM vector
-	uint8_t temp_rpm[MAX_RPM_TABLE_LENGTH] = {15, 20, 32, 44, 56, 67, 79, 91}; // temporary rpm vector, expressed in RPM / 100
-	for (uint8_t i = 0; i < MAX_RPM_TABLE_LENGTH; i++){
-		RPM_INJ_C[i] = 600000 / ((long)temp_rpm[i] * TIMER1_US_CONST);
-		//print_string("INJ"); print_int(RPM_INJ_C[i]);
-	}
 
-	// Initialize load vector
-	LOAD[0] = 25;LOAD[1] = 36;LOAD[2] = 46;LOAD[3] = 58;LOAD[4] = 68;LOAD[5] = 80;LOAD[6] = 90;LOAD[7] = 101;
+
 
 	// Initializing Volumetric efficiency table
 	VE[7][0] = 29; VE[7][1] = 29; VE[7][2] = 29; VE[7][3] = 100; VE[7][4] = 100; VE[7][5] = 96; VE[7][6] = 91; VE[7][7] = 87;
@@ -37,6 +30,19 @@ void initInjTable()
 	AFR[2][0] = 133; AFR[2][1] = 133; AFR[2][2] = 142; AFR[2][3] = 142; AFR[2][4] = 140; AFR[2][5] = 136; AFR[2][6] = 136; AFR[2][7] = 136;
 	AFR[1][0] = 133; AFR[1][1] = 133; AFR[1][2] = 144; AFR[1][3] = 144; AFR[1][4] = 142; AFR[1][5] = 138; AFR[1][6] = 138; AFR[1][7] = 138;
 	AFR[0][0] = 133; AFR[0][1] = 133; AFR[0][2] = 146; AFR[0][3] = 146; AFR[0][4] = 144; AFR[0][5] = 140; AFR[0][6] = 140; AFR[0][7] = 140;
+	// Initialize RPM vector
+	uint8_t temp_rpm[MAX_RPM_TABLE_LENGTH] = {15, 20, 32, 44, 56, 67, 79, 91}; // temporary rpm vector, expressed in RPM / 100
+	for (uint8_t i = 0; i < MAX_RPM_TABLE_LENGTH; i++){
+		RPM_INJ_C[i] = 600000 / ((long)temp_rpm[i] * TIMER1_US_CONST);
+		print_string("INJ_RPM"); print_int(temp_rpm[i]);
+		for (uint8_t j = 0; j < MAX_LOAD_TABLE_LENGTH; j++){
+			print_string("VE"); print_int(VE[i][j]);
+			print_string("AFR"); print_int(AFR[i][j]);
+		}
+		print_string("VE_Done"); new_line();
+		print_string("AFR_Done"); new_line();
+	}
+
 	/* kPa
 	 * 101
 	 * 90

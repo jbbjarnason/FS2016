@@ -42,13 +42,9 @@ void initIgnition()
 }
 void initIgnTable()
 {
-	// New ignition RPM vector
-	// Initialize RPM vector
-	uint8_t temp_rpm[MAX_RPM_TABLE_LENGTH] = {15, 16, 27, 37, 48, 59, 70, 91}; // temporary rpm vector, expressed in RPM / 100
-	for (uint8_t i = 0; i < MAX_RPM_TABLE_LENGTH; i++){
-		RPM_IGN_C[i] = 600000 / ((long)temp_rpm[i] * TIMER1_US_CONST);
-		print_string("IGN"); print_int(RPM_IGN_C[i]);
-	}
+	// Initialize load vector
+	LOAD[0] = 25;LOAD[1] = 36;LOAD[2] = 46;LOAD[3] = 58;LOAD[4] = 68;LOAD[5] = 80;LOAD[6] = 90;LOAD[7] = 101;
+
 	// NEW ignition table 25.4.16 , NEED TO divide degrees with 10, store 8.0° as 80°, int instead of float
 	IGN[7][0] = 130; IGN[7][1] = 100; IGN[7][2] = 294; IGN[7][3] = 341; IGN[7][4] = 341; IGN[7][5] = 341; IGN[7][6] = 341; IGN[7][7] = 341;
 	IGN[6][0] = 130; IGN[6][1] = 100; IGN[6][2] = 286; IGN[6][3] = 332; IGN[6][4] = 332; IGN[6][5] = 332; IGN[6][6] = 332; IGN[6][7] = 332;
@@ -60,6 +56,20 @@ void initIgnTable()
 	IGN[0][0] = 50;  IGN[0][1] = 100; IGN[0][2] = 240; IGN[0][3] = 278; IGN[0][4] = 278; IGN[0][5] = 278; IGN[0][6] = 278; IGN[0][7] = 278;
 
 	DWELL[0] = 40; DWELL[1] = 40; DWELL[2] = 40; DWELL[3] = 40; DWELL[4] = 40; DWELL[5] = 40; DWELL[6] = 40; DWELL[7] = 40;
+
+	// New ignition RPM vector
+	// Initialize RPM vector
+	uint8_t temp_rpm[MAX_RPM_TABLE_LENGTH] = {15, 16, 27, 37, 48, 59, 70, 91}; // temporary rpm vector, expressed in RPM / 100
+	for (uint8_t i = 0; i < MAX_RPM_TABLE_LENGTH; i++){
+		RPM_IGN_C[i] = 600000 / ((long)temp_rpm[i] * TIMER1_US_CONST);
+		print_string("IGN_RPM"); print_int(temp_rpm[i]);
+		print_string("LOAD"); print_int(LOAD[i]);
+		print_string("DWELL"); print_int(DWELL[i]);
+		for (uint8_t j = 0; j < MAX_LOAD_TABLE_LENGTH; j++){
+			print_string("IGN"); print_int(IGN[i][j]);
+		}
+		print_string("IGN_Done"); new_line();
+	}
 
 	/* kPa
 		 * 101
