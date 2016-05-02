@@ -49,6 +49,11 @@ int main(void)
 
 	uint8_t temp_cnt = 0;
 	uint8_t temp_ave = 0;
+	uint8_t time_1 = 0;
+	uint8_t boost_ctrl = false;
+	long time_2 = 0;
+	long current_time = 0;
+
 	for (;;)
 	{
 
@@ -177,15 +182,39 @@ int main(void)
 		}
 
 
-		if (engine_rpm_c < REV_LIMIT_COUNTS)
-				engine_inj = false;
-			// Fuel cut hysterisis
-		if (!engine_inj)
+		if(engine_MAP2 < BOOST_CUTOFF)
 		{
-			if (engine_rpm_c > FUEL_CUT_RPM_COUNTS)
-				engine_inj = true;
-			else
-				return;
+			time_1 = ;
+			if(!boost_ctrl)
+			{
+				current_time = millis;
+				boost_ctrl = true;
+
+			}
+
 		}
+
+		if(engine_MAP2 < BOOST_CUTOFF)
+		{
+
+		}
+
+/*
+		//Boost controller
+		if (engine_MAP2 < BOOST_CUTOFF)
+				boost = false;
+		// Boost control hysterisis
+		if (!boost)
+		{
+			if (engine_MAP2 > BOOST_THRESHOLD)
+				boost = true;
+			else
+			    break;
+		}
+		if(boost)
+		{
+
+		}
+*/
 	}
 }

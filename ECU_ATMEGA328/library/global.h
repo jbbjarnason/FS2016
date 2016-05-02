@@ -47,6 +47,8 @@ void initGlobalVariables();
 #define MAX_DWELL_TIME			9000 / TIMER1_US_CONST
 #define MAP_AVERAGE_COUNTS		5		// Has to be less than 256
 
+#define BOOST_CUTOFF			62		// Serial value for 76 kpa Boost controller cuts the boost at 76kpa (before turbine) (serial = 0.7753*kpa + 4.221)
+
 #define MAX_RPM_TABLE_LENGTH			8
 #define MAX_LOAD_TABLE_LENGTH			8
 
@@ -83,19 +85,22 @@ uint16_t RPM_IGN_C[MAX_RPM_TABLE_LENGTH];					// RPM vector for Ignition in 4탎 
 uint8_t LOAD[MAX_LOAD_TABLE_LENGTH];						// Load vector of MAP values in kPa
 uint8_t DWELL[MAX_RPM_TABLE_LENGTH];						// Dwell duty cycle vector
 
-volatile uint16_t engine_rpm_c;						// RPM cycle in 4탎 (counter values)
-volatile uint8_t engine_status;						// Is the engine on (1 On, 0 off)
+volatile uint16_t engine_rpm_c;							// RPM cycle in 4탎 (counter values)
+volatile uint8_t engine_status;							// Is the engine on (1 On, 0 off)
 volatile uint8_t engine_ign;							// Is time to spark (1 On, 0 off) /*********UNNESSASARY **********/
 volatile uint8_t engine_inj;							// Is time to turn on the injection
-volatile uint16_t engine_MAP;						// Minimum average of values from the MAP sensor in kpa
-volatile uint8_t engine_minMapAve[MAP_AVERAGE_COUNTS]; // Measured values from the MAP sensor
-volatile uint8_t engine_minMAP;						// Minimum of average values, when intake valve is fully open
+volatile uint16_t engine_MAP;							// Minimum average of values from the MAP sensor in kpa
+volatile uint8_t engine_minMapAve[MAP_AVERAGE_COUNTS]; 	// Measured values from the MAP sensor
+volatile uint8_t engine_minMAP;							// Minimum of average values, when intake valve is fully open
 volatile uint8_t engine_kpa;							// MAP sensor value in kPa
+volatile uint16_t engine_MAP2;							// Minimum average of values from the MAP2 sensor in kpa
+volatile uint8_t boost_pwm;								// Boolean value for creating pwm for boost controller (1 On, 0 off)
 volatile uint8_t engine_iat;							// Intake air temperature
 volatile uint8_t engine_tps;							// Throttle position
 volatile uint8_t engine_afr;							// Air to fuel ratio
 
 volatile uint8_t accel_enrich;							// Acceleration enrichment for throttle position in 탎
+
 
 
 uint8_t new_rpm;							// Boolean to calculate new indexes for new rpm in mapping arrays
