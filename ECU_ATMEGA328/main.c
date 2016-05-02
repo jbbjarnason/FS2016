@@ -175,5 +175,17 @@ int main(void)
 				accel_enrich = 0;
 			millis = 0;
 		}
+
+
+		if (engine_rpm_c < REV_LIMIT_COUNTS)
+				engine_inj = false;
+			// Fuel cut hysterisis
+		if (!engine_inj)
+		{
+			if (engine_rpm_c > FUEL_CUT_RPM_COUNTS)
+				engine_inj = true;
+			else
+				return;
+		}
 	}
 }
