@@ -137,7 +137,8 @@ ISR(INT0_vect) // Interrupts 2° after TDC
 	uint32_t M_fuel  = ((long)VE_inter * engine_MAP * ENGINE_CC * 10) / ((long)287 * (273 + engine_iat) * AFR_inter * 1.1); // Mass of fuel in milligramms
 	//uint32_t M_= M_air * 10 / AFR_inter;
 	//print_long(M_fuel);
-	uint8_t PW = ((long)M_fuel * 1000000 / ((long)INJ_SIZE * PULSE_DIVIDE * NR_OF_INJ_PER_CYL) + INJECTOR_OPENING_TIME) / TIMER0_US_CONST;
+	uint8_t PW = ((long)M_fuel * 1000000 / ((long)INJ_SIZE * PULSE_DIVIDE * NR_OF_INJ_PER_CYL)
+			+ INJECTOR_OPENING_TIME + accel_enrich) / TIMER0_US_CONST;
 	//print_char('P'); print_int(PW);
 	OCR0B = PW;
 

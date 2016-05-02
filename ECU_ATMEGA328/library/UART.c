@@ -11,9 +11,12 @@
 void uartInit(uint32_t baud_rate)
 {
 	baud_rate = CLOCKSPEED / 16 / baud_rate - 1;
-	//Set baud rate
-	UBRR0H = (unsigned char)(baud_rate>>8); //Last 4 bits
-	UBRR0L = (unsigned char)baud_rate;		//First 8 bits.
+	//Set baud rate to 2 Mbps
+	UCSR0A |= (1<<U2X0);
+	UBRR0H = 0;
+	UBRR0L = 0;
+	//UBRR0H = (unsigned char)(baud_rate>>8); //Last 4 bits
+	//UBRR0L = (unsigned char)baud_rate;		//First 8 bits.
 	// Enable receiver and transmitter
 	UCSR0B = (1<<RXEN0)|(1<<TXEN0);
 	//Set frame format at 8 data bits and 2 stop bits.
@@ -44,7 +47,25 @@ void print(unsigned int data)
 	while(!((UCSR0A & 0x20) == 0x20)){ }
 	UDR0 = 32; // whitespace
 }
-
+//Send Byte over to terminal
+void print_byte(uint16_t data)
+{
+	unsigned int div = 100;		// Divider to divide data with
+	char start = 0;
+	char cnt = 3;
+	for (int i = 1; i <= cnt; i++)
+	{
+		char send = data / div + 48; // calculate the Ascii for each number
+		if(send != 48 || start == 1 || i == cnt)
+		{
+			//Wait until hardware is ready to send data, UDRE0 = Data register empty
+			print_char(send);
+			start = 1;
+		}
+		data %= div;
+		div /= 10;
+	}
+}
 //Send Integers over to terminal
 void print_int(unsigned int data)
 {
@@ -111,7 +132,7 @@ void print_char(unsigned char data)
 }
 void new_line()
 {
-	while(!((UCSR0A & (1 << UDRE0)) == (1 << UDRE0))){ }
+	while(!((UCSR0A & (1 << UDRE0))));
 	UDR0 = 10; // new line
 }
 // Attention the character array needs to end with NULL (0)

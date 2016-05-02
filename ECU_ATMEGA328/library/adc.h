@@ -22,8 +22,9 @@ uint8_t readADC(uint8_t pin);
  * ADC channel 1 Intake air temperature
  * ADC channel 2 Throttle position sensor
  * ADC channel 3 Coolant temperature
- * ADC channel 4 Oil temp
- * ADC channel 7 Manifold absolute pressure
+ * ADC channel 4 Manifold absolute pressure after restrictor
+ * ADC channel 5 Oil temp
+ * ADC channel 7 Manifold absolute pressure intake manifold
  */
 uint8_t sensor_reading[ADC_CHANNELS];
 uint8_t prev_sensor_reading;

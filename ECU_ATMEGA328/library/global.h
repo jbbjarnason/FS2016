@@ -10,12 +10,18 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include "adc.h"
 
 void initGlobalVariables();
 
 // DEFINE PIN NUMBERS
-#define WB_PIN 0
-#define MAP_PIN 7
+#define WB_PIN 0	//wideband
+#define IAT_PIN 1	//intake air temp
+#define TPS_PIN 2	//throttle position
+#define CLT_PIN 3	//coolant temp
+#define MAP2_PIN 4	//manifold absoulute pressure after restrictor
+#define OT_PIN 5	//oil temp
+#define MAP_PIN 7	//manifold absolute pressure intake
 
 #define MAINTABLE_MAX_RPM_LENGTH		23
 #define MAINTABLE_MAX_LOAD_LENGTH		1
@@ -54,8 +60,13 @@ void initGlobalVariables();
 #define INJ_SIZE						5860		// Injector size 5860 mg/s
 
 
+#define TPS_TIME_THRESHOLD				200			// TPS time threshold in milliseconds
+#define TPS_THRESHOLD					30			// TPS threshold of change after time, in 0-255 (keep in mind zero is around 50 and max 200 WOT)
+#define TPS_ACCEL_ENRICH				1			// Enrichment factor of change, TPS_ACCEL_ENRICH * Change in µs
 
-uint8_t lowMAPindex;						// The length of MAP axis
+
+
+uint8_t lowMAPindex;
 uint8_t highMAPindex;
 uint8_t lowRPMindexIgn;
 uint8_t highRPMindexIgn;
@@ -81,10 +92,16 @@ volatile uint8_t engine_minMapAve[MAP_AVERAGE_COUNTS]; // Measured values from t
 volatile uint8_t engine_minMAP;						// Minimum of average values, when intake valve is fully open
 volatile uint8_t engine_kpa;							// MAP sensor value in kPa
 volatile uint8_t engine_iat;							// Intake air temperature
+volatile uint8_t engine_tps;							// Throttle position
+volatile uint8_t engine_afr;							// Air to fuel ratio
+
+volatile uint8_t accel_enrich;							// Acceleration enrichment for throttle position in µs
 
 
 uint8_t new_rpm;							// Boolean to calculate new indexes for new rpm in mapping arrays
 uint8_t second_rpm;							// Boolean to calculate new MAP index
+
+uint8_t print_ser;
 
 /*struct engine_t
 {

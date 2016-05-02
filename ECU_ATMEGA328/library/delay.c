@@ -19,12 +19,12 @@ void delayInit()
 	TCCR2A = (1 << WGM21);	// Clear timer on compare match
 	TCCR2B = (1 << CS22); 	// Prescale timer with 64, 16 MHz / 64 = 250 KHz => 4µs
 	TCNT2 = 0;				// Initialize counter to zero
-	OCR2A = 124; 			// Interrupt 250 counts 0 - 249, 250 * 4µs = 1 ms
+	OCR2A = 249; 			// Interrupt 250 counts 0 - 249, 250 * 4µs = 1 ms
 	TIMSK2 = (1 << OCIE2A);	// Enable compare match A
 	sei();					// Enable interrupts again
 
 	// Test pin
-	DDRB |= (1 << PINB0);
+	//DDRB |= (1 << PINB0);
 }
 void set_millis(unsigned long set)
 {
@@ -53,6 +53,6 @@ void delayus(unsigned int delay) {
 
 ISR(TIMER2_COMPA_vect)
 {
-	PORTB ^= (1 << PINB0);
+	//PORTB ^= (1 << PINB0);
 	millis++;
 }

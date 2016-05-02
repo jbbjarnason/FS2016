@@ -7,6 +7,7 @@
 #include "helpers.h"
 
 
+
 // Calculate the weight of the value compared to indexes x1 and x2
 uint8_t interpolation(uint16_t value, uint16_t x1, uint16_t x2)
 {
@@ -62,4 +63,77 @@ uint16_t lookup_table(uint16_t table[], uint8_t max_length, uint16_t compare)
 		}
 	}
 	return lowindex | (highindex << 8);
+}
+
+void print_serial()
+{
+	print_ser++;
+	if (print_ser == 1)
+		print_load_indexes();
+	else if (print_ser == 2)
+		print_injection_indexes();
+	else if (print_ser == 3)
+		print_ignition_indexes();
+	else if (print_ser == 4)
+		print_interpolation();
+	else if (print_ser == 5)
+		print_Analog_1();
+	else if (print_ser == 6)
+		print_Analog_2();
+	else if (print_ser == 7)
+		print_RPM();
+	else if (print_ser > 7)
+		print_ser = 0;
+}
+void print_load_indexes()
+{
+	print_char('L');print_char(' ');
+	print_byte(lowMAPindex);print_char(' ');
+	print_byte(highMAPindex);
+	new_line();
+}
+void print_injection_indexes()
+{
+	print_char('I');print_char(' ');
+	print_byte(lowRPMindexInj);print_char(' ');
+	print_byte(highRPMindexInj);
+	new_line();
+}
+void print_ignition_indexes()
+{
+	print_char('S');print_char(' ');
+	print_byte(lowRPMindexIgn);print_char(' ');
+	print_byte(highRPMindexIgn);
+	new_line();
+}
+void print_interpolation()
+{
+	print_char('P');print_char(' ');
+	print_byte(p_inj);print_char(' ');
+	print_byte(p_ign);print_char(' ');
+	print_byte(q);
+	new_line();
+}
+void print_Analog_1()
+{
+	print_char('A');print_char(' ');
+	print_byte(sensor_reading[WB_PIN]);print_char(' ');
+	print_byte(sensor_reading[IAT_PIN]);print_char(' ');
+	print_byte(sensor_reading[TPS_PIN]);
+	new_line();
+}
+void print_Analog_2()
+{
+	print_char('a');print_char(' ');
+	print_byte(sensor_reading[CLT_PIN]);print_char(' ');
+	print_byte(sensor_reading[MAP2_PIN]);print_char(' ');
+	//print_byte(sensor_reading[OT_PIN]);print_char(' ');
+	print_byte(engine_MAP);
+	new_line();
+}
+void print_RPM()
+{
+	print_char('R');print_char(' ');
+	print_int(engine_rpm_c);
+	//new_line();
 }

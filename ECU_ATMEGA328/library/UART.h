@@ -14,6 +14,7 @@
 
 void uartInit(uint32_t baud_rate);
 void print(unsigned int data);
+void print_byte(uint16_t data);
 void print_int(unsigned int data);
 void print_long(unsigned long data);
 void print_hex(unsigned long data);

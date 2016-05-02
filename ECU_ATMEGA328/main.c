@@ -16,14 +16,14 @@
 
 
 
-uint8_t average(uint8_t vector[], uint8_t length)
+/*uint8_t average(uint8_t vector[], uint8_t length)
 {
 	uint16_t sum = 0;
 	for (uint8_t i = 0; i < length; i++)
 		sum += vector[i];
 	//print_char('s'); print_int(sum);
 	return sum / length;
-}
+}*/
 
 
 
@@ -43,6 +43,9 @@ int main(void)
 	PORTB &= ~(1 << PINB3);
 	PORTB &= ~(1 << PINB4);
 	initGlobalVariables();
+	delayInit(); // keep track of milliseconds
+
+
 
 	uint8_t temp_cnt = 0;
 	uint8_t temp_ave = 0;
@@ -54,7 +57,7 @@ int main(void)
 		// Routine to get median from the MAP sensor to find relevant minimum value
 		engine_minMapAve[temp_cnt++] = readADC(MAP_PIN);
 		temp_cnt = temp_cnt % MAP_AVERAGE_COUNTS;
-		temp_ave = median(engine_minMapAve, MAP_AVERAGE_COUNTS);
+		temp_ave = median(engine_minMapAve, (int)MAP_AVERAGE_COUNTS);
 		if (temp_ave < engine_minMAP)
 			engine_minMAP = temp_ave;
 
@@ -155,11 +158,22 @@ int main(void)
 				//print_string("kpa"); print_int(temp_kpa);
 				PORTB ^= (1 << PINB4);
 				//print_int(engine_minMAP);
-
+				print_serial();
 				engine_minMAP = 255;
 			}
 			second_rpm = !second_rpm;
 			new_rpm = false;
+
+		}
+		// Throttle position enrichment routine
+		if(millis > TPS_TIME_THRESHOLD)
+		{
+			int16_t change = sensor_reading[TPS_PIN] - engine_tps;
+			if (change > TPS_THRESHOLD)
+				accel_enrich = change * TPS_ACCEL_ENRICH;
+			else
+				accel_enrich = 0;
+			millis = 0;
 		}
 	}
 }
