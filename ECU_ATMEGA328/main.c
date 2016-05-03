@@ -46,8 +46,8 @@ int main(void)
 	initGlobalVariables();
 	delayInit(); // keep track of milliseconds
 
-	duty_off = 45;
-	duty_on = 5;
+	duty_off = 43;											// Duty cycle for boost controller
+	duty_on = 7;											// Duty cycle for boost controller
 
 	uint8_t temp_cnt = 0;
 	uint8_t temp_ave = 0;
@@ -179,31 +179,43 @@ int main(void)
 
 
 		// Boost controller setings
-		if(sensor_reading[MAP2_PIN] < BOOST_CUTOFF)
+		if(sensor_reading[MAP2_PIN] < BOOST_CUTOFF)					// Turn boost controller on when pressure is above threshold
 		{
-			if(!boost_ctrl && (millis - off_time) > duty_off)
+
+			if(duty_on > 40)										// Threshold parameters for max duty cycle at 20Hz
+			{
+				duty_on = 40;										// Max duty cycle = 85% at 20Hz, 40ms = 80% duty cycle
+				duty_off = 10;										// 1/20Hz = 50ms -----> 50ms - duty_on = 10ms
+			}
+			else if(duty_on < 7)									// Threshold parameters for min duty cycle at 20Hz
+			{
+				duty_on = 7;										// Min duty cycle = 10% at 20Hz, 7ms = 14% duty cycle
+				duty_off = 43;										// 1/20Hz = 50ms -----> 50ms - duty_on = 43ms
+			}
+
+			if(!boost_ctrl && (millis - off_time) > duty_off)		// Parameters for creating pwm at 20Hz
 			{
 				on_time = millis;
-				PORTB |= (1 << PINB1);
+				PORTB |= (1 << PINB1);								// Turn on PINB1 (D9)
 				boost_ctrl = true;
 			}
-			if(boost_ctrl && (millis - on_time) > duty_on)
+			if(boost_ctrl && (millis - on_time) > duty_on)			// Parameters for creating pwm at 20Hz
 			{
 				off_time = millis;
-				PORTB &= ~(1 << PINB1);
+				PORTB &= ~(1 << PINB1);								// Turn off PINB1 (D9)
 				boost_ctrl = false;
-				if(duty_on > 5 && duty_on < 42)
-				{
-					print_char('a');
-					duty_on = (sensor_reading[MAP2_PIN]/BOOST_CUTOFF)*42;
+
+				if(duty_on < 41 && duty_on > 6)						// Duty cycle increases with decreasing pressure in intake manifold
+				{													// Duty cycle decreases with increasing pressure in intake manifold
+					duty_on = (150/sensor_reading[MAP2_PIN])*7;
 					duty_off = 50 - duty_on;
 				}
 			}
 		}
-		else
+		else														// Turn boost controller off when pressure is above threshold
 		{
 			PORTB &= ~(1 << PINB1);
-			duty_on = 5;
+			duty_on = 5;											// Put duty cycle to the original value
 			duty_off = 45;
 		}
 
