@@ -46,21 +46,15 @@ int main(void)
 	initGlobalVariables();
 	delayInit(); // keep track of milliseconds
 
-
+	duty_off = 45;
+	duty_on = 5;
 
 	uint8_t temp_cnt = 0;
 	uint8_t temp_ave = 0;
-	uint8_t time_1 = 0;
-	uint8_t boost_ctrl = false;
-	long time_2 = 0;
-	long current_time = 0;
 
 	for (;;)
 	{
 
-		//print_char('a');
-		//print_int(MAP_PIN);
-		//print_int(readADC(MAP_PIN));
 		// Routine to get median from the MAP sensor to find relevant minimum value
 		engine_minMapAve[temp_cnt++] = readADC(MAP_PIN);
 		temp_cnt = temp_cnt % MAP_AVERAGE_COUNTS;
@@ -165,7 +159,7 @@ int main(void)
 				//print_string("kpa"); print_int(temp_kpa);
 				PORTB ^= (1 << PINB4);
 				//print_int(engine_minMAP);
-				print_serial();
+				//print_serial();
 				engine_minMAP = 255;
 			}
 			second_rpm = !second_rpm;
@@ -173,7 +167,7 @@ int main(void)
 
 		}
 		// Throttle position enrichment routine
-		if(millis > TPS_TIME_THRESHOLD)
+		/*if(millis > TPS_TIME_THRESHOLD)
 		{
 			int16_t change = sensor_reading[TPS_PIN] - engine_tps;
 			if (change > TPS_THRESHOLD)
@@ -181,27 +175,37 @@ int main(void)
 			else
 				accel_enrich = 0;
 			millis = 0;
-		}
+		}*/
 
-		//print_int(sensor_reading[MAP2_PIN]);
-		print_long(millis);
-		// Boost controller
+
+		// Boost controller setings
 		if(sensor_reading[MAP2_PIN] < BOOST_CUTOFF)
 		{
-			time_1 = 5 *0.5;
-			if(!boost_ctrl)
+			if(!boost_ctrl && (millis - off_time) > duty_off)
 			{
-				current_time = millis;
-				boost_ctrl = true;
+				on_time = millis;
 				PORTB |= (1 << PINB1);
+				boost_ctrl = true;
 			}
-			if(boost_ctrl && current_time + time_2 < millis)
+			if(boost_ctrl && (millis - on_time) > duty_on)
 			{
-				PORTB &= !(1 << PINB1);
-				time_2 = 42 - time_1 + millis;
+				off_time = millis;
+				PORTB &= ~(1 << PINB1);
+				boost_ctrl = false;
+				if(duty_on > 5 && duty_on < 42)
+				{
+					print_char('a');
+					duty_on = (sensor_reading[MAP2_PIN]/BOOST_CUTOFF)*42;
+					duty_off = 50 - duty_on;
+				}
 			}
 		}
 		else
+		{
 			PORTB &= ~(1 << PINB1);
+			duty_on = 5;
+			duty_off = 45;
+		}
+
 	}
 }
