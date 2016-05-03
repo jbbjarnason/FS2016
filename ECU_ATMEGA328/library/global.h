@@ -114,6 +114,7 @@ uint8_t new_rpm;							// Boolean to calculate new indexes for new rpm in mappin
 uint8_t second_rpm;							// Boolean to calculate new MAP index
 
 uint8_t print_ser;
+uint8_t receive_ser;
 
 /*struct engine_t
 {
