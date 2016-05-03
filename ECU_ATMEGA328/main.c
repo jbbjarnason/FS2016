@@ -178,7 +178,7 @@ int main(void)
 		}*/
 
 
-		// Boost controller setings
+		// Boost controller settings
 		if(sensor_reading[MAP2_PIN] < BOOST_CUTOFF)					// Turn boost controller on when pressure is above threshold
 		{
 
