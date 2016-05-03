@@ -65,7 +65,7 @@ ISR(ADC_vect)
 	uint16_t tmp = ADCH + prev_sensor_reading;
 	sensor_reading[sensor_index++] = (tmp >> 1); // divide with 2 by shifting right
 	// run through all of the adc channels (pins)
-	if (sensor_index >= ADC_CHANNELS - 1) { // stop reading, -1 to skip the MAP sensor
+	if (sensor_index >= ADC_CHANNELS) {
 		ADCSRA &= ~(1 << ADIE);
 		sensor_index = 0;
 	} else { // go to next sensor

@@ -39,7 +39,8 @@ int main(void)
 	//print_string("REV_LIMIT_COUNTS"); print_int(REV_LIMIT_COUNTS);
 	//print_string("FUEL_CUT_RPM_COUNTS"); print_int(FUEL_CUT_RPM_COUNTS);
 	// debugging pins
-	DDRB |= (1 << PINB3) | (1 << PINB4);
+	DDRB |= (1 << PINB3) | (1 << PINB4) | (1 << PINB1);
+	PORTB &= ~(1 << PINB1);
 	PORTB &= ~(1 << PINB3);
 	PORTB &= ~(1 << PINB4);
 	initGlobalVariables();
@@ -57,7 +58,9 @@ int main(void)
 	for (;;)
 	{
 
-		//print_char('a'); print_int(MAP_PIN);
+		print_int(sensor_reading[MAP2_PIN]);
+		//print_char('a');
+		//print_int(MAP_PIN);
 		//print_int(readADC(MAP_PIN));
 		// Routine to get median from the MAP sensor to find relevant minimum value
 		engine_minMapAve[temp_cnt++] = readADC(MAP_PIN);
@@ -181,40 +184,27 @@ int main(void)
 			millis = 0;
 		}
 
-
-		if(engine_MAP2 < BOOST_CUTOFF)
+		//print_int(sensor_reading[MAP2_PIN]);
+		//print_int(BOOST_CUTOFF);
+		// Boost controller
+		if(sensor_reading[MAP2_PIN] < BOOST_CUTOFF)
 		{
-			time_1 = ;
+			PORTB |= (1 << PINB1);
+			/*time_1 = 5 *0.5;
 			if(!boost_ctrl)
 			{
 				current_time = millis;
 				boost_ctrl = true;
-
+				PORTB |= (1 << PINB1);
 			}
-
+			if(boost_ctrl && current_time + time_2 < millis)
+			{
+				PORTB &= !(1 << PINB1);
+				time_2 = 42 - time_1 + millis;
+			}*/
 		}
+		else
+			PORTB &= ~(1 << PINB1);
 
-		if(engine_MAP2 < BOOST_CUTOFF)
-		{
-
-		}
-
-/*
-		//Boost controller
-		if (engine_MAP2 < BOOST_CUTOFF)
-				boost = false;
-		// Boost control hysterisis
-		if (!boost)
-		{
-			if (engine_MAP2 > BOOST_THRESHOLD)
-				boost = true;
-			else
-			    break;
-		}
-		if(boost)
-		{
-
-		}
-*/
 	}
 }
