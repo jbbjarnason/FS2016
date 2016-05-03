@@ -15,7 +15,6 @@
 
 void initSensors();
 void startADC();
-//void transferFunctions();
 uint8_t readADC(uint8_t pin);
 
 /*

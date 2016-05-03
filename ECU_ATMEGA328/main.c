@@ -58,7 +58,6 @@ int main(void)
 	for (;;)
 	{
 
-		print_int(sensor_reading[MAP2_PIN]);
 		//print_char('a');
 		//print_int(MAP_PIN);
 		//print_int(readADC(MAP_PIN));
@@ -185,12 +184,11 @@ int main(void)
 		}
 
 		//print_int(sensor_reading[MAP2_PIN]);
-		//print_int(BOOST_CUTOFF);
+		print_long(millis);
 		// Boost controller
 		if(sensor_reading[MAP2_PIN] < BOOST_CUTOFF)
 		{
-			PORTB |= (1 << PINB1);
-			/*time_1 = 5 *0.5;
+			time_1 = 5 *0.5;
 			if(!boost_ctrl)
 			{
 				current_time = millis;
@@ -201,10 +199,9 @@ int main(void)
 			{
 				PORTB &= !(1 << PINB1);
 				time_2 = 42 - time_1 + millis;
-			}*/
+			}
 		}
 		else
 			PORTB &= ~(1 << PINB1);
-
 	}
 }
