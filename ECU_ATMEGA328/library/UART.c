@@ -10,6 +10,7 @@
 
 void uartInit(uint32_t baud_rate)
 {
+	cli();
 	baud_rate = CLOCKSPEED / 16 / baud_rate - 1;
 	//Set baud rate to 2 Mbps
 	UCSR0A |= (1<<U2X0);
@@ -17,12 +18,17 @@ void uartInit(uint32_t baud_rate)
 	UBRR0L = 0;
 	//UBRR0H = (unsigned char)(baud_rate>>8); //Last 4 bits
 	//UBRR0L = (unsigned char)baud_rate;		//First 8 bits.
+	// Enable receiver and transmitter and receive interrupt
+	UCSR0B = (1<<RXEN0)|(1<<TXEN0)|(1<<RXCIE0);
 	// Enable receiver and transmitter
-	UCSR0B = (1<<RXEN0)|(1<<TXEN0);
+	//UCSR0B = (1<<RXEN0)|(1<<TXEN0);
 	//Set frame format at 8 data bits and 2 stop bits.
 	UCSR0C |= 0x0E;
-	while(!((UCSR0A & 0x20) == 0x20)){ }
-	UDR0 = 10; // new line
+
+	buffer_index = 0;
+	for (int u = 0; u < 10; u++)
+			buffer[u] = 0;
+	sei();
 }
 
 //Send Integers over to terminal
@@ -145,4 +151,42 @@ void print_string(char * data)
 	//new_line();
 	while(!((UCSR0A & (1 << UDRE0)) == (1 << UDRE0))){ }
 	UDR0 = 32; // space
+}
+
+
+// Receiving form is as follow
+// 'b''x''y''zzz'
+// b is either d, a or c (degree, air to fuel, volumetr...)
+// x is rpm index in the tuning arrays
+// y is load index in the tuning arrays
+// zzz is the data for the arrays
+ISR(USART_RX_vect)
+{
+	PORTB |= (1 << PINB4);
+	buffer[buffer_index] = UDR0;
+	if (buffer[buffer_index++] == '\r')
+	{
+		uint8_t data = receive_to_int();
+		if (buffer[0] == 'd') // DEGREE
+			IGN[buffer[2]][buffer[1]] = data;
+		if (buffer[0] == 'a') // Air to fuel ratio
+			AFR[buffer[2]][buffer[1]] = data;
+		if (buffer[0] == 'v') // Volumetric efficiency
+			VE[buffer[2]][buffer[1]] = data;
+		buffer_index = 0;
+
+		print_byte(data);
+		for (int u = 0; u < 10; u++)
+				buffer[u] = 0;
+	}
+	PORTB &= ~(1 << PINB4);
+}
+
+uint8_t receive_to_int()
+{
+	uint8_t retur = 0;
+	uint8_t decimal_factor = 1;
+	for(;buffer_index > 2; decimal_factor *= 10)
+		retur += (buffer[--buffer_index] - 48) * decimal_factor;
+	return retur;
 }
