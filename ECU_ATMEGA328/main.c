@@ -116,7 +116,7 @@ int main(void)
 			//print_string("cur"); print_int(engine_rpm_c);
 			//print_char('p'); print_int(p_ign);
 
-			PORTB ^= (1 << PINB3);
+			//PORTB ^= (1 << PINB3);
 			// if second rpm value arrives is calculated new index for load in the mapping tables
 			if (second_rpm){
 				// gera if temp_kpa í stað engine-minmap, nota signed int !!!!!
@@ -157,7 +157,7 @@ int main(void)
 				//print_char('H');print_int(LOAD[highMAPindex]);
 
 				//print_string("kpa"); print_int(temp_kpa);
-				PORTB ^= (1 << PINB4);
+				//PORTB ^= (1 << PINB4);
 				//print_int(engine_minMAP);
 				//print_serial();
 				engine_minMAP = 255;
