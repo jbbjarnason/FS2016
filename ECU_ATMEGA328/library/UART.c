@@ -188,7 +188,7 @@ ISR(USART_RX_vect)
 
 uint16_t receive_to_int()
 {
-	uint8_t retur = 0;
+	uint16_t retur = 0;
 	uint8_t decimal_factor = 1;
 	for(;buffer_index > 3; decimal_factor *= 10)
 		retur += (buffer[--buffer_index] - 48) * decimal_factor;
