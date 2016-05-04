@@ -13,11 +13,11 @@ void uartInit(uint32_t baud_rate)
 	cli();
 	baud_rate = CLOCKSPEED / 16 / baud_rate - 1;
 	//Set baud rate to 2 Mbps
-	UCSR0A |= (1<<U2X0);
-	UBRR0H = 0;
-	UBRR0L = 0;
-	//UBRR0H = (unsigned char)(baud_rate>>8); //Last 4 bits
-	//UBRR0L = (unsigned char)baud_rate;		//First 8 bits.
+	//UCSR0A |= (1<<U2X0);
+	//UBRR0H = 0;
+	//UBRR0L = 0;
+	UBRR0H = (unsigned char)(baud_rate>>8); //Last 4 bits
+	UBRR0L = (unsigned char)baud_rate;		//First 8 bits.
 	// Enable receiver and transmitter and receive interrupt
 	UCSR0B = (1<<RXEN0)|(1<<TXEN0)|(1<<RXCIE0);
 	// Enable receiver and transmitter
@@ -164,29 +164,33 @@ ISR(USART_RX_vect)
 {
 	PORTB |= (1 << PINB4);
 	buffer[buffer_index] = UDR0;
-	if (buffer[buffer_index++] == '\r')
+
+	if (buffer[buffer_index++] == '\r') // end at carriage return
 	{
-		uint8_t data = receive_to_int();
+		buffer_index -= 1;	// Remove count of carriage return
+		uint16_t data = receive_to_int();
+		print_char('g');
+		print_int(data);
 		if (buffer[0] == 'd') // DEGREE
-			IGN[buffer[2]][buffer[1]] = data;
+			IGN[buffer[2] - 48][buffer[1] - 48] = data;
 		if (buffer[0] == 'a') // Air to fuel ratio
-			AFR[buffer[2]][buffer[1]] = data;
+			AFR[buffer[2] - 48][buffer[1] - 48] = data;
 		if (buffer[0] == 'v') // Volumetric efficiency
-			VE[buffer[2]][buffer[1]] = data;
+			VE[buffer[2] - 48][buffer[1] - 48] = data;
 		buffer_index = 0;
 
-		print_byte(data);
-		for (int u = 0; u < 10; u++)
-				buffer[u] = 0;
+
+		//for (int u = 0; u < 10; u++)
+		//		buffer[u] = 0;
 	}
 	PORTB &= ~(1 << PINB4);
 }
 
-uint8_t receive_to_int()
+uint16_t receive_to_int()
 {
 	uint8_t retur = 0;
 	uint8_t decimal_factor = 1;
-	for(;buffer_index > 2; decimal_factor *= 10)
+	for(;buffer_index > 3; decimal_factor *= 10)
 		retur += (buffer[--buffer_index] - 48) * decimal_factor;
 	return retur;
 }

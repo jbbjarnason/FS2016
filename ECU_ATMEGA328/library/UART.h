@@ -23,7 +23,7 @@ void print_char(unsigned char data);
 void print_string(char * data);
 void new_line();
 
-uint8_t receive_to_int();
+uint16_t receive_to_int();
 
 volatile uint8_t buffer_index;
 volatile unsigned char buffer[10];
