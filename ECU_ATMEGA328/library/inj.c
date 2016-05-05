@@ -7,6 +7,8 @@
 
 #include "inj.h"
 
+
+
 void initInjTable()
 {
 
@@ -64,7 +66,7 @@ void initInjection()
 	// Initialize Mapping tables
 	initInjTable();
 	// Initialize TIMER0
-	// Prescale timer to 16 MHz / 128, 64 µs per count
+	// Prescale timer to 16 MHz / 1024, 64 µs per count
 	TCCR0B = (1 << CS00) | (1 << CS02);
 	// Enable compare match a, b and overflow
 	//TIMSK0 = (1 << OCIE0A) | (1 << OCIE0B) | (1 << TOIE0);
@@ -107,7 +109,7 @@ ISR(INT0_vect) // Interrupts 2° after TDC
 			return;
 	}
 	// Calculate injector ON time
-	uint16_t intake_valve_open = (INTAKE_VALVE_DEGREES * (long)engine_rpm_c) / 360;
+	volatile uint16_t intake_valve_open = (INTAKE_VALVE_DEGREES * (long)engine_rpm_c) / 360;
 	inj_start_time = (((long)engine_rpm_c - TCNT1 + intake_valve_open) * TIMER1_US_CONST - INJECTOR_OPENING_TIME) / TIMER0_US_CONST;
 	//print_char('V');print_int(intake_valve_open);
 	//print_char('R');print_int(engine_rpm_c);
@@ -116,6 +118,8 @@ ISR(INT0_vect) // Interrupts 2° after TDC
 	OCR0A = inj_start_time - timer0_ovf * 256;
 	if (timer0_ovf > 0){ // Turn on overflow interrupt
 		TIMSK0 |= (1 << TOIE0);
+
+		PORTB ^= (1 << PINB4);
 	}
 	else {
 		TIMSK0 |= (1 << OCIE0A);
@@ -128,24 +132,32 @@ ISR(INT0_vect) // Interrupts 2° after TDC
 	uint8_t AFR_inter = (((long)AFR[lowMAPindex][lowRPMindexInj] * (100 - p_inj) * (100 - q)) +
 			((long)AFR[lowMAPindex][highRPMindexInj] * p_inj * (100 - q)) +
 			((long)AFR[highMAPindex][lowRPMindexInj] * (100 - p_inj) * q) +
-			((long)AFR[highMAPindex][highRPMindexInj] * p_inj * q)) / 100000;
+			((long)AFR[highMAPindex][highRPMindexInj] * p_inj * q)) / 1000;
 	// Mass of air = VE * MAP (Pa) * Cyl_disp(M^3) / ( 287 (J/kgK) * (273.15 + IAT(°C))
 	//print_char('V'); print_int(VE_inter);
 	//print_char('M'); print_int(engine_MAP);
 	//print_char('I'); print_int(engine_iat);
 	//print_char('A'); print_int(AFR_inter);
-	uint32_t M_fuel  = ((long)VE_inter * engine_MAP * ENGINE_CC * 10) / ((long)287 * (273 + engine_iat) * AFR_inter * 1.1); // Mass of fuel in milligramms
+	//uint32_t M_fuel  = ((long)VE_inter * engine_MAP * ENGINE_CC * 10) / ((long)287 * (273 + engine_iat) * AFR_inter); // Mass of fuel in milligramms
+	//print_char('F'); print_long(M_fuel);
 	//uint32_t M_= M_air * 10 / AFR_inter;
 	//print_long(M_fuel);
-	uint8_t PW = ((long)M_fuel * 1000000 / ((long)INJ_SIZE * PULSE_DIVIDE * NR_OF_INJ_PER_CYL)
-			+ INJECTOR_OPENING_TIME + accel_enrich) / TIMER0_US_CONST;
+	//uint8_t PW = ((long)M_fuel * 1000000 / ((long)INJ_SIZE * PULSE_DIVIDE * NR_OF_INJ_PER_CYL)
+	//		+ INJECTOR_OPENING_TIME + accel_enrich) / TIMER0_US_CONST;
 	//print_char('P'); print_int(PW);
-	OCR0B = PW;
-
+	//OCR0B = PW;
+	volatile uint32_t M_fuel1 = ((unsigned long)VE_inter * engine_MAP * FUEL_CONST) / ((unsigned long) AFR_inter * (273 + engine_iat));
+	//print_char('f'); print_long(M_fuel1);
+	volatile uint16_t time_us = M_fuel1 + INJECTOR_OPENING_TIME + accel_enrich;
+	//print_char('t'); print_long(time_us);
+	OCR0B = time_us / TIMER0_US_CONST;
+	//print_char('B');print_byte(OCR0B);
 
 
 	// Measure analog values on all channels from wideband pin
 	startADC();
+	PORTB ^= (1 << PINB3);
+
 }
 
 ISR(TIMER0_COMPA_vect)
@@ -158,7 +170,8 @@ ISR(TIMER0_COMPA_vect)
 	}*/
 	//print_char('A');print_int(timer0_ovf);
 	//print_char('A');
-	if (engine_inj && !timer0_ovf){
+	print_char('T');print_byte(TCNT0);
+	if (TCNT0 >= OCR0A && engine_inj && !timer0_ovf){
 		PORTD |= (1 << PIND6);
 		PORTD |= (1 << PIND5);
 		TCNT0 = 0;

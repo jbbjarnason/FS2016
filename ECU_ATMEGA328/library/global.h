@@ -60,6 +60,9 @@ void initGlobalVariables();
 #define PULSE_DIVIDE					2			// number of injector pulses one round of the camshaft
 #define NR_OF_INJ_PER_CYL				2			// number of injector per cylender
 #define INJ_SIZE						5860		// Injector size 5860 mg/s
+#define R								287			// Gas constant J/(kg K)
+
+#define FUEL_CONST						74324		// FUEL_CONST = ENGINE_CC * 10^9 / (R*PULSE_DIVIDE*NR_OF_INJ_PER_CYL*INJ_SIZE)
 
 
 #define TPS_TIME_THRESHOLD				200			// TPS time threshold in milliseconds
@@ -114,7 +117,7 @@ uint8_t new_rpm;							// Boolean to calculate new indexes for new rpm in mappin
 uint8_t second_rpm;							// Boolean to calculate new MAP index
 
 uint8_t print_ser;
-uint8_t receive_ser;
+//uint8_t receive_ser;
 
 /*struct engine_t
 {
