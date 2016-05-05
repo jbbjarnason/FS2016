@@ -1,18 +1,18 @@
-/*
- * inj.c
- *
- *  Created on: 23. apr. 2016
- *      Author: JonB
- */
+
 
 #include "inj.h"
 
-
-
 void initInjTable()
 {
+	// Initialize RPM vector
+	uint8_t temp_rpm[MAX_RPM_TABLE_LENGTH] = {15, 20, 32, 44, 56, 67, 79, 91}; // temporary rpm vector, expressed in RPM / 100
+	for (uint8_t i = 0; i < MAX_RPM_TABLE_LENGTH; i++){
+		RPM_INJ_C[i] = 600000 / ((long)temp_rpm[i] * TIMER1_US_CONST);
+		//print_string("INJ"); print_int(RPM_INJ_C[i]);
+	}
 
-
+	// Initialize load vector
+	LOAD[0] = 25;LOAD[1] = 36;LOAD[2] = 46;LOAD[3] = 58;LOAD[4] = 68;LOAD[5] = 80;LOAD[6] = 90;LOAD[7] = 101;
 
 	// Initializing Volumetric efficiency table
 	VE[7][0] = 29; VE[7][1] = 29; VE[7][2] = 29; VE[7][3] = 100; VE[7][4] = 100; VE[7][5] = 96; VE[7][6] = 91; VE[7][7] = 87;
@@ -32,19 +32,6 @@ void initInjTable()
 	AFR[2][0] = 133; AFR[2][1] = 133; AFR[2][2] = 142; AFR[2][3] = 142; AFR[2][4] = 140; AFR[2][5] = 136; AFR[2][6] = 136; AFR[2][7] = 136;
 	AFR[1][0] = 133; AFR[1][1] = 133; AFR[1][2] = 144; AFR[1][3] = 144; AFR[1][4] = 142; AFR[1][5] = 138; AFR[1][6] = 138; AFR[1][7] = 138;
 	AFR[0][0] = 133; AFR[0][1] = 133; AFR[0][2] = 146; AFR[0][3] = 146; AFR[0][4] = 144; AFR[0][5] = 140; AFR[0][6] = 140; AFR[0][7] = 140;
-	// Initialize RPM vector
-	uint8_t temp_rpm[MAX_RPM_TABLE_LENGTH] = {15, 20, 32, 44, 56, 67, 79, 91}; // temporary rpm vector, expressed in RPM / 100
-	for (uint8_t i = 0; i < MAX_RPM_TABLE_LENGTH; i++){
-		RPM_INJ_C[i] = 600000 / ((long)temp_rpm[i] * TIMER1_US_CONST);
-		print_string("INJ_RPM"); print_int(temp_rpm[i]);
-		for (uint8_t j = 0; j < MAX_LOAD_TABLE_LENGTH; j++){
-			print_string("VE"); print_int(VE[i][j]);
-			print_string("AFR"); print_int(AFR[i][j]);
-		}
-		print_string("VE_Done"); new_line();
-		print_string("AFR_Done"); new_line();
-	}
-
 	/* kPa
 	 * 101
 	 * 90
@@ -66,9 +53,10 @@ void initInjection()
 	// Initialize Mapping tables
 	initInjTable();
 	// Initialize TIMER0
-	// Prescale timer to 16 MHz / 1024, 64 µs per count
+	// Prescale timer to 16 MHz / 128, 64 µs per count
 	TCCR0B = (1 << CS00) | (1 << CS02);
 	// Enable compare match a, b and overflow
+	//TIMSK0 = (1 << TOIE0);
 	//TIMSK0 = (1 << OCIE0A) | (1 << OCIE0B) | (1 << TOIE0);
 	// Enable rising edge for interrupt 0
 	EICRA |= (1 << ISC01) | (1 << ISC00);
@@ -87,7 +75,10 @@ void initInjection()
 	PORTD &= ~(1 << PIND5);
 
 	TCNT0 = 0;
+	ovf_flag = false;
+	stop_flag = false;
 	timer0_ovf = 0;
+	timer1_counts = 0;
 	sei();
 }
 
@@ -95,7 +86,7 @@ void initInjection()
 ISR(INT0_vect) // Interrupts 2° after TDC
 {
 	TCNT0 = 0;
-	counter = 0;
+	//counter = 0;
 	inj_flag = true;
 
 	// Check Rev limit
@@ -109,7 +100,7 @@ ISR(INT0_vect) // Interrupts 2° after TDC
 			return;
 	}
 	// Calculate injector ON time
-	volatile uint16_t intake_valve_open = (INTAKE_VALVE_DEGREES * (long)engine_rpm_c) / 360;
+	uint16_t intake_valve_open = (INTAKE_VALVE_DEGREES * (long)engine_rpm_c) / 360;
 	inj_start_time = (((long)engine_rpm_c - TCNT1 + intake_valve_open) * TIMER1_US_CONST - INJECTOR_OPENING_TIME) / TIMER0_US_CONST;
 	//print_char('V');print_int(intake_valve_open);
 	//print_char('R');print_int(engine_rpm_c);
@@ -118,8 +109,7 @@ ISR(INT0_vect) // Interrupts 2° after TDC
 	OCR0A = inj_start_time - timer0_ovf * 256;
 	if (timer0_ovf > 0){ // Turn on overflow interrupt
 		TIMSK0 |= (1 << TOIE0);
-
-		PORTB ^= (1 << PINB4);
+		ovf_flag = false;
 	}
 	else {
 		TIMSK0 |= (1 << OCIE0A);
@@ -129,7 +119,7 @@ ISR(INT0_vect) // Interrupts 2° after TDC
 				((long)VE[lowMAPindex][highRPMindexInj] * p_inj * (100 - q)) +
 				((long)VE[highMAPindex][lowRPMindexInj] * (100 - p_inj) * q) +
 				((long)VE[highMAPindex][highRPMindexInj] * p_inj * q)) / 10000;
-	uint8_t AFR_inter = (((long)AFR[lowMAPindex][lowRPMindexInj] * (100 - p_inj) * (100 - q)) +
+	uint16_t AFR_inter = (((long)AFR[lowMAPindex][lowRPMindexInj] * (100 - p_inj) * (100 - q)) +
 			((long)AFR[lowMAPindex][highRPMindexInj] * p_inj * (100 - q)) +
 			((long)AFR[highMAPindex][lowRPMindexInj] * (100 - p_inj) * q) +
 			((long)AFR[highMAPindex][highRPMindexInj] * p_inj * q)) / 1000;
@@ -138,26 +128,28 @@ ISR(INT0_vect) // Interrupts 2° after TDC
 	//print_char('M'); print_int(engine_MAP);
 	//print_char('I'); print_int(engine_iat);
 	//print_char('A'); print_int(AFR_inter);
-	//uint32_t M_fuel  = ((long)VE_inter * engine_MAP * ENGINE_CC * 10) / ((long)287 * (273 + engine_iat) * AFR_inter); // Mass of fuel in milligramms
-	//print_char('F'); print_long(M_fuel);
+	//uint32_t M_fuel  = ((long)VE_inter * engine_MAP * ENGINE_CC * 10) / ((long)287 * (273 + engine_iat) * AFR_inter * 1.1); // Mass of fuel in milligramms
 	//uint32_t M_= M_air * 10 / AFR_inter;
 	//print_long(M_fuel);
-	//uint8_t PW = ((long)M_fuel * 1000000 / ((long)INJ_SIZE * PULSE_DIVIDE * NR_OF_INJ_PER_CYL)
-	//		+ INJECTOR_OPENING_TIME + accel_enrich) / TIMER0_US_CONST;
+	//uint8_t PW = ((long)M_fuel * 1000000 / ((long)INJ_SIZE * PULSE_DIVIDE * NR_OF_INJ_PER_CYL) + INJECTOR_OPENING_TIME) / TIMER0_US_CONST;
 	//print_char('P'); print_int(PW);
 	//OCR0B = PW;
-	volatile uint32_t M_fuel1 = ((unsigned long)VE_inter * engine_MAP * FUEL_CONST) / ((unsigned long) AFR_inter * (273 + engine_iat));
-	//print_char('f'); print_long(M_fuel1);
-	volatile uint16_t time_us = M_fuel1 + INJECTOR_OPENING_TIME + accel_enrich;
-	//print_char('t'); print_long(time_us);
-	OCR0B = time_us / TIMER0_US_CONST;
-	//print_char('B');print_byte(OCR0B);
 
+	M_fuel1 = ((unsigned long)VE_inter * engine_MAP * FUEL_CONST) / ((unsigned long) AFR_inter * (273 + engine_iat));
+	inj_stop_time = (M_fuel1 + INJECTOR_OPENING_TIME + accel_enrich) / TIMER0_US_CONST;
+	uint16_t cycle = ((long)engine_rpm_c * TIMER1_US_CONST) / TIMER0_US_CONST;
+	if (inj_stop_time + inj_start_time > cycle){
+		OCR0B = (int)inj_stop_time + inj_start_time - cycle;
+		stop_flag = true;
+	}
+	else{
+		OCR0B = inj_stop_time;
+		stop_flag = false;
+	}
 
 	// Measure analog values on all channels from wideband pin
 	startADC();
-	PORTB ^= (1 << PINB3);
-
+	timer1_counts = TCNT1;
 }
 
 ISR(TIMER0_COMPA_vect)
@@ -170,12 +162,14 @@ ISR(TIMER0_COMPA_vect)
 	}*/
 	//print_char('A');print_int(timer0_ovf);
 	//print_char('A');
-	print_char('T');print_byte(TCNT0);
-	if (TCNT0 >= OCR0A && engine_inj && !timer0_ovf){
+	PORTB ^= (1 << PINB4);
+	if ((TCNT0 >= OCR0A) && engine_inj && !timer0_ovf){
 		PORTD |= (1 << PIND6);
 		PORTD |= (1 << PIND5);
-		TCNT0 = 0;
+		if (!stop_flag)
+			TCNT0 = 0;
 		TIMSK0 = (1 << OCIE0B);
+		engine_inj = false;
 	}
 }
 ISR(TIMER0_COMPB_vect)
@@ -185,7 +179,7 @@ ISR(TIMER0_COMPB_vect)
 	if (TCNT0 >= OCR0B){
 		PORTD &= ~(1 << PIND6);
 		PORTD &= ~(1 << PIND5);
-		TIMSK0 = 0;
+		//TIMSK0 = 0;
 		//new_line();
 	}
 	//print_int(OCR0B);
@@ -194,8 +188,20 @@ ISR(TIMER0_COMPB_vect)
 }
 ISR(TIMER0_OVF_vect)
 {
+
 	//counter = counter + 256;
-	if (--timer0_ovf < 1)
+	PORTB ^= (1 << PINB3);
+	//if (ovf_flag){
+	//	ovf_flag = false;
+	//	timer0_ovf--;
+	//}
+	if (timer1_counts + TIMER0_US_CONST/TIMER1_US_CONST < TCNT1)
+		ovf_flag = true;
+	if (ovf_flag && (--timer0_ovf < 1))
+	{
+	//	print_char('h');
+		TCNT0 = 0;
 		TIMSK0 = (1 << OCIE0A);
+	}
 	//print_char('O');
 }

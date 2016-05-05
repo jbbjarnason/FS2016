@@ -106,6 +106,9 @@ volatile uint8_t engine_iat;							// Intake air temperature
 volatile uint8_t engine_tps;							// Throttle position
 volatile uint8_t engine_afr;							// Air to fuel ratio
 
+//volatile uint8_t VE_inter;
+//volatile uint16_t AFR_inter;
+
 volatile uint8_t accel_enrich;							// Acceleration enrichment for throttle position in µs
 
 
