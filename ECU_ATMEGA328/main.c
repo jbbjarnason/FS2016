@@ -119,6 +119,7 @@ int main(void)
 			//PORTB ^= (1 << PINB3);
 			// if second rpm value arrives is calculated new index for load in the mapping tables
 			if (second_rpm){
+				print_char('s');print_int(inj_stop_time);
 				// gera if temp_kpa í stað engine-minmap, nota signed int !!!!!
 				uint16_t temp_kpa;
 				if (engine_minMAP < 4)

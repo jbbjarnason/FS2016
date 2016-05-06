@@ -117,7 +117,24 @@ ISR(INT1_vect)										//******************
 	engine_rpm_c = TCNT1; 	// Store the latest cycle value
 	TCNT1 = 0; 				// Initialize the cycle counter
 
-	new_rpm = true;			// Boolean used to indicate new_rpm which calculates new mapping values (main loop)
+	// Check Rev limit
+	if (engine_rpm_c < REV_LIMIT_COUNTS){
+		engine_inj = false;
+		engine_ign = false;
+	}
+	// Fuel/ignition cut hysterisis
+	if (!engine_inj){
+		if (engine_rpm_c > FUEL_CUT_RPM_COUNTS){
+			engine_inj = true;
+			engine_ign = true;
+		}
+		else
+			return;
+	}
+
+	startINJ();
+
+
 
 	uint32_t degree = (((long)IGN[lowMAPindex][lowRPMindexIgn] * (100 - p_ign) * (100 - q)) +
 					((long)IGN[lowMAPindex][highRPMindexIgn] * p_ign * (100 - q)) +
@@ -128,7 +145,7 @@ ISR(INT1_vect)										//******************
 	print_char('2'); print_int(IGN[highRPMindexIgn][lowMAPindex]/10);
 	print_char('3'); print_int(IGN[lowRPMindexIgn][highMAPindex]/10);
 	print_char('4'); print_int(IGN[highRPMindexIgn][highMAPindex]/10);*/
-	engine_ign = (engine_rpm_c > REV_LIMIT_COUNTS);
+	//engine_ign = (engine_rpm_c > REV_LIMIT_COUNTS);
 
 	/*uint8_t lowRPMIndex1 = 0;
 	uint8_t highRPMIndex1 = table.RPMLength - 1;
@@ -179,6 +196,7 @@ ISR(INT1_vect)										//******************
 		print_string("high"); print_int(highRPMIndex);
 		print_counter = 0;
 	}*/
+	new_rpm = true;			// Boolean used to indicate new_rpm which calculates new mapping values (main loop)
 }
 
 // Turn on coil

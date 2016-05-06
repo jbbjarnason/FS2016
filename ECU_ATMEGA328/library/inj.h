@@ -30,6 +30,8 @@ volatile uint8_t inj_flag;
 void initInjection();
 void initInjTable();
 
+void startINJ();
+
 
 
 

@@ -58,6 +58,7 @@ void initInjection()
 	// Enable compare match a, b and overflow
 	//TIMSK0 = (1 << TOIE0);
 	//TIMSK0 = (1 << OCIE0A) | (1 << OCIE0B) | (1 << TOIE0);
+	TIMSK0 = (1 << OCIE0B);
 	// Enable rising edge for interrupt 0
 	EICRA |= (1 << ISC01) | (1 << ISC00);
 	// Enable INT0 interrupt for cranksignal High
@@ -81,9 +82,43 @@ void initInjection()
 	timer1_counts = 0;
 	sei();
 }
+ISR(INT0_vect)
+{
+	startADC();
+}
+void startINJ()
+{
+	// Fuel CUTT
+	if(engine_inj){
+		PORTD |= (1 << PIND6);
+		PORTD |= (1 << PIND5);
+	} else {
+		PORTD &= ~(1 << PIND6);
+		PORTD &= ~(1 << PIND5);
+	}
+	uint8_t VE_inter = (((long)VE[lowMAPindex][lowRPMindexInj] * (100 - p_inj) * (100 - q)) +
+					((long)VE[lowMAPindex][highRPMindexInj] * p_inj * (100 - q)) +
+					((long)VE[highMAPindex][lowRPMindexInj] * (100 - p_inj) * q) +
+					((long)VE[highMAPindex][highRPMindexInj] * p_inj * q)) / 10000;
+	uint16_t AFR_inter = (((long)AFR[lowMAPindex][lowRPMindexInj] * (100 - p_inj) * (100 - q)) +
+			((long)AFR[lowMAPindex][highRPMindexInj] * p_inj * (100 - q)) +
+			((long)AFR[highMAPindex][lowRPMindexInj] * (100 - p_inj) * q) +
+			((long)AFR[highMAPindex][highRPMindexInj] * p_inj * q)) / 1000;
 
+	M_fuel1 = ((unsigned long)VE_inter * engine_MAP * FUEL_CONST) / ((unsigned long) AFR_inter * (273 + engine_iat));
+	inj_stop_time = (M_fuel1 + INJECTOR_OPENING_TIME + accel_enrich) / TIMER0_US_CONST;
+	TCNT0 = 0;
+	OCR0B = inj_stop_time;
+}
+ISR(TIMER0_COMPB_vect)
+{
+	if(TCNT0 >= OCR0B){
+		PORTD &= ~(1 << PIND6);
+		PORTD &= ~(1 << PIND5);
+	}
+}
 // Calculate injector timing
-ISR(INT0_vect) // Interrupts 2° after TDC
+/*ISR(INT0_vect) // Interrupts 2° after TDC
 {
 	TCNT0 = 0;
 	//counter = 0;
@@ -154,12 +189,12 @@ ISR(INT0_vect) // Interrupts 2° after TDC
 
 ISR(TIMER0_COMPA_vect)
 {
-	/*if (counter + TCNT0 >= inj_start_time && inj_flag)
-	{
-		PORTD ^= (1 << PIND6);
-		PORTD ^= (1 << PIND5);
-		inj_flag = false;
-	}*/
+//	if (counter + TCNT0 >= inj_start_time && inj_flag)
+//	{
+//		PORTD ^= (1 << PIND6);
+//		PORTD ^= (1 << PIND5);
+//		inj_flag = false;
+//	}
 	//print_char('A');print_int(timer0_ovf);
 	//print_char('A');
 	PORTB ^= (1 << PINB4);
@@ -204,4 +239,4 @@ ISR(TIMER0_OVF_vect)
 		TIMSK0 = (1 << OCIE0A);
 	}
 	//print_char('O');
-}
+}*/

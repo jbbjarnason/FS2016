@@ -14,6 +14,7 @@
 #include <avr/interrupt.h>
 #include "global.h"
 #include "UART.h"
+#include "inj.h"
 
 void initIgnition();
 void initIgnTable();
