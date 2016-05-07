@@ -114,6 +114,9 @@ volatile uint8_t engine_afr;							// Air to fuel ratio
 
 volatile uint8_t dec_cut;
 
+
+volatile uint8_t dec_cut;
+
 volatile uint8_t VE_inter;
 volatile uint16_t AFR_inter;
 volatile uint32_t degree;
