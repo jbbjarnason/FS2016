@@ -52,6 +52,9 @@ int main(void)
 	uint8_t temp_cnt = 0;
 	uint8_t temp_ave = 0;
 
+	uint8_t prev_TPS = 0;
+	accel_enrich = 0;
+
 	for (;;)
 	{
 
@@ -86,10 +89,10 @@ int main(void)
 			}
 			p_ign = 100 - interpolation(engine_rpm_c, RPM_IGN_C[highRPMindexIgn], RPM_IGN_C[lowRPMindexIgn]);
 
-			/*degree = (((long)IGN[lowMAPindex][lowRPMindexIgn] * (100 - p_ign) * (100 - q)) +
+			degree = (((long)IGN[lowMAPindex][lowRPMindexIgn] * (100 - p_ign) * (100 - q)) +
 					((long)IGN[lowMAPindex][highRPMindexIgn] * p_ign * (100 - q)) +
 					((long)IGN[highMAPindex][lowRPMindexIgn] * (100 - p_ign) * q) +
-					((long)IGN[highMAPindex][highRPMindexIgn] * p_ign * q)) / 10000;*/
+					((long)IGN[highMAPindex][highRPMindexIgn] * p_ign * q)) / 10000;
 
 
 			lowRPMindexInj = 0;
@@ -110,6 +113,14 @@ int main(void)
 			}
 			p_inj = 100 - interpolation(engine_rpm_c, RPM_INJ_C[highRPMindexInj], RPM_INJ_C[lowRPMindexInj]);
 
+			VE_inter = (((long)VE[lowMAPindex][lowRPMindexInj] * (100 - p_inj) * (100 - q)) +
+						((long)VE[lowMAPindex][highRPMindexInj] * p_inj * (100 - q)) +
+						((long)VE[highMAPindex][lowRPMindexInj] * (100 - p_inj) * q) +
+						((long)VE[highMAPindex][highRPMindexInj] * p_inj * q)) / 10000;
+			AFR_inter = (((long)AFR[lowMAPindex][lowRPMindexInj] * (100 - p_inj) * (100 - q)) +
+						((long)AFR[lowMAPindex][highRPMindexInj] * p_inj * (100 - q)) +
+						((long)AFR[highMAPindex][lowRPMindexInj] * (100 - p_inj) * q) +
+						((long)AFR[highMAPindex][highRPMindexInj] * p_inj * q)) / 1000;
 			//uint16_t indexes = lookup_table(RPM_IGN_C, MAX_RPM_TABLE_LENGTH, engine_rpm_c);
 			//lowRPMindexIgn = indexes & 0xFF;
 			//highRPMindexIgn = (indexes >> 8);
@@ -125,7 +136,7 @@ int main(void)
 			//PORTB ^= (1 << PINB3);
 			// if second rpm value arrives is calculated new index for load in the mapping tables
 			if (second_rpm){
-				print_char('s');print_int(inj_stop_time);
+				//print_char('s');print_int(inj_stop_time);
 				// gera if temp_kpa í stað engine-minmap, nota signed int !!!!!
 				uint16_t temp_kpa;
 				if (engine_minMAP < 4)
@@ -173,22 +184,70 @@ int main(void)
 			new_rpm = false;
 
 		}
-		// Throttle position enrichment routine
-		/*if(millis > TPS_TIME_THRESHOLD)
+
+		//******************************************************************************************************//
+		//******************************************* TPS Parameters *******************************************//
+		//******************************************************************************************************//
+
+		//TODO
+		/*
+		 * if(sensor_reading[TPA_PIN] > FULL_THROTTLE_THRESHOLD)		// When throttle is engaged more than 70%, the exhaust gas enrichment correction is disabled
+		 * {
+		 * 		Disable EGO enrichment
+		 * }
+		 */
+
+
+
+		// Quick Throttle Acceleration
+		if(TPS_count > TPS_CYCLE)
 		{
-			int16_t change = sensor_reading[TPS_PIN] - engine_tps;
-			if (change > TPS_THRESHOLD)
-				accel_enrich = change * TPS_ACCEL_ENRICH;
-			else
-				accel_enrich = 0;
-			millis = 0;
-		}*/
+			// Acceleration											// Quick throttle input gives small amount of extra fuel
+			if(sensor_reading[TPS_PIN] > prev_TPS)					// Check if accelerating
+			{
+
+				uint8_t diff = sensor_reading[TPS_PIN] - prev_TPS;
+				//print_char('d'); print_int(diff);
+
+				if(diff > TPS_THRESHOLD)							// If throttle input is high the difference goes over the threshold
+				{													// and activates the acceleration enrichment
+					accel_enrich = diff * TPS_ACCEL_ENRICH;
+					//print_char('D'); print_int(diff);
+					//print_char('A'); print_int(accel_enrich);
+				}
+				else
+					accel_enrich = 0;
+
+			}
+			prev_TPS = sensor_reading[TPS_PIN];
+			TPS_count = 0;
+		}
+		TPS_count++;
 
 
-		// Boost controller settings
+
+
+		// Closed Throttle Deceleration Parameters
+		//TODO  IDEA: increase the DEC_THRESH_COUNT when engine is cool so the injectors don't close when engine is in warmup enrichment mode
+		if(sensor_reading[TPS_PIN] < IDLE_TPS_THRESH && engine_rpm_c < DEC_THRESH_COUNT)
+		{												// If TPS sensor is in closed +5% position and the engine RPM is over idle RPM value
+			dec_cut = false;										// the injectors are disabled
+			print_char('C'); print_int(engine_inj);
+		}
+		else if(engine_rpm_c > REV_LIMIT_COUNTS)
+		{
+			dec_cut = true;
+		}
+
+
+
+
+		//*********************************************************************************************************//
+		//************************************** Boost Controller Parameters **************************************//
+		//*********************************************************************************************************//
+
 		if(sensor_reading[MAP2_PIN] < BOOST_CUTOFF)					// Turn boost controller on when pressure is above threshold
 		{
-
 			if(duty_on > 40)										// Threshold parameters for max duty cycle at 20Hz
 			{
 				duty_on = 40;										// Max duty cycle = 85% at 20Hz, 40ms = 80% duty cycle
@@ -222,8 +281,8 @@ int main(void)
 		else														// Turn boost controller off when pressure is above threshold
 		{
 			PORTB &= ~(1 << PINB1);
-			duty_on = 5;											// Put duty cycle to the original value
-			duty_off = 45;
+			duty_on = 10;											// Put duty cycle to the original value
+			duty_off = 40;
 		}
 
 	}

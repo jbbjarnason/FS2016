@@ -101,21 +101,21 @@ void startINJ()
 			return;
 	}
 	// Fuel CUTT
-	if(engine_inj){
+	if(engine_inj && dec_cut){
 		PORTD |= (1 << PIND6);
 		PORTD |= (1 << PIND5);
 	} else {
 		PORTD &= ~(1 << PIND6);
 		PORTD &= ~(1 << PIND5);
 	}
-	uint8_t VE_inter = (((long)VE[lowMAPindex][lowRPMindexInj] * (100 - p_inj) * (100 - q)) +
+	/*uint8_t VE_inter = (((long)VE[lowMAPindex][lowRPMindexInj] * (100 - p_inj) * (100 - q)) +
 					((long)VE[lowMAPindex][highRPMindexInj] * p_inj * (100 - q)) +
 					((long)VE[highMAPindex][lowRPMindexInj] * (100 - p_inj) * q) +
 					((long)VE[highMAPindex][highRPMindexInj] * p_inj * q)) / 10000;
 	uint16_t AFR_inter = (((long)AFR[lowMAPindex][lowRPMindexInj] * (100 - p_inj) * (100 - q)) +
 			((long)AFR[lowMAPindex][highRPMindexInj] * p_inj * (100 - q)) +
 			((long)AFR[highMAPindex][lowRPMindexInj] * (100 - p_inj) * q) +
-			((long)AFR[highMAPindex][highRPMindexInj] * p_inj * q)) / 1000;
+			((long)AFR[highMAPindex][highRPMindexInj] * p_inj * q)) / 1000;*/
 
 	M_fuel1 = ((unsigned long)VE_inter * engine_MAP * FUEL_CONST) / ((unsigned long) AFR_inter * (273 + engine_iat));
 	inj_stop_time = (M_fuel1 + INJECTOR_OPENING_TIME + accel_enrich) / TIMER0_US_CONST;

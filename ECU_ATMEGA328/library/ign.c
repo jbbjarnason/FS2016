@@ -119,12 +119,10 @@ ISR(INT1_vect)										//******************
 
 	startINJ();
 
-
-
-	uint32_t degree = (((long)IGN[lowMAPindex][lowRPMindexIgn] * (100 - p_ign) * (100 - q)) +
+	/*uint32_t degree = (((long)IGN[lowMAPindex][lowRPMindexIgn] * (100 - p_ign) * (100 - q)) +
 					((long)IGN[lowMAPindex][highRPMindexIgn] * p_ign * (100 - q)) +
 					((long)IGN[highMAPindex][lowRPMindexIgn] * (100 - p_ign) * q) +
-					((long)IGN[highMAPindex][highRPMindexIgn] * p_ign * q)) / 100000;
+					((long)IGN[highMAPindex][highRPMindexIgn] * p_ign * q)) / 100000;*/
 	/*print_char('D'); print_int(degree);
 	print_char('1'); print_int(IGN[lowRPMindexIgn][lowMAPindex]/10);
 	print_char('2'); print_int(IGN[highRPMindexIgn][lowMAPindex]/10);
