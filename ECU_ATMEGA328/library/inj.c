@@ -88,8 +88,9 @@ ISR(INT0_vect)
 }
 void startINJ()
 {
+	print_char('S'); print_int(engine_inj);
 	// Fuel CUTT
-	if(engine_inj){
+	if(engine_inj && dec_cut){
 		PORTD |= (1 << PIND6);
 		PORTD |= (1 << PIND5);
 	} else {

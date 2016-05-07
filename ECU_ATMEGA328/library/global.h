@@ -65,10 +65,14 @@ void initGlobalVariables();
 #define FUEL_CONST						74324		// FUEL_CONST = ENGINE_CC * 10^9 / (R*PULSE_DIVIDE*NR_OF_INJ_PER_CYL*INJ_SIZE)
 
 
-#define TPS_TIME_THRESHOLD				200			// TPS time threshold in milliseconds
-#define TPS_THRESHOLD					30			// TPS threshold of change after time, in 0-255 (keep in mind zero is around 50 and max 200 WOT)
-#define TPS_ACCEL_ENRICH				1			// Enrichment factor of change, TPS_ACCEL_ENRICH * Change in µs
+//#define TPS_TIME_THRESHOLD				200			// TPS time threshold in milliseconds
+#define TPS_THRESHOLD					20			// TPS threshold of change after time, in 0-255 (keep in mind zero is around 50 and max 200 WOT)
+#define TPS_ACCEL_ENRICH				100			// Enrichment factor of change, TPS_ACCEL_ENRICH * Change in µs
+#define TPS_CYCLE						4
 
+#define DEC_THRESH_RPM					2000		// Engine RPM for deceleration threshold
+#define DEC_THRESH_COUNT				60000000 / DEC_THRESH_RPM / TIMER1_US_CONST			// Engine count for deceleration threshold, used to cut off inj. when decelerating
+#define IDLE_TPS_THRESH					60			// Indicates when throttle is fully closed
 
 
 uint8_t lowMAPindex;
@@ -102,9 +106,13 @@ volatile uint8_t duty_on;
 volatile uint8_t duty_off;
 volatile long on_time;
 volatile long off_time;
+volatile uint8_t TPS_count;								// TPS function is activated every (TPS_CYCLE) cycle
 volatile uint8_t engine_iat;							// Intake air temperature
 volatile uint8_t engine_tps;							// Throttle position
 volatile uint8_t engine_afr;							// Air to fuel ratio
+
+
+volatile uint8_t dec_cut;
 
 //volatile uint8_t VE_inter;
 //volatile uint16_t AFR_inter;
