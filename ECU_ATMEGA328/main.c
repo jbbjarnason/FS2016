@@ -86,6 +86,11 @@ int main(void)
 			}
 			p_ign = 100 - interpolation(engine_rpm_c, RPM_IGN_C[highRPMindexIgn], RPM_IGN_C[lowRPMindexIgn]);
 
+			/*degree = (((long)IGN[lowMAPindex][lowRPMindexIgn] * (100 - p_ign) * (100 - q)) +
+					((long)IGN[lowMAPindex][highRPMindexIgn] * p_ign * (100 - q)) +
+					((long)IGN[highMAPindex][lowRPMindexIgn] * (100 - p_ign) * q) +
+					((long)IGN[highMAPindex][highRPMindexIgn] * p_ign * q)) / 10000;*/
+
 
 			lowRPMindexInj = 0;
 			highRPMindexInj = MAX_RPM_TABLE_LENGTH - 1;
@@ -104,6 +109,7 @@ int main(void)
 				}
 			}
 			p_inj = 100 - interpolation(engine_rpm_c, RPM_INJ_C[highRPMindexInj], RPM_INJ_C[lowRPMindexInj]);
+
 			//uint16_t indexes = lookup_table(RPM_IGN_C, MAX_RPM_TABLE_LENGTH, engine_rpm_c);
 			//lowRPMindexIgn = indexes & 0xFF;
 			//highRPMindexIgn = (indexes >> 8);

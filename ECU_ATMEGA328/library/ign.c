@@ -117,21 +117,6 @@ ISR(INT1_vect)										//******************
 	engine_rpm_c = TCNT1; 	// Store the latest cycle value
 	TCNT1 = 0; 				// Initialize the cycle counter
 
-	// Check Rev limit
-	if (engine_rpm_c < REV_LIMIT_COUNTS){
-		engine_inj = false;
-		engine_ign = false;
-	}
-	// Fuel/ignition cut hysterisis
-	if (!engine_inj){
-		if (engine_rpm_c > FUEL_CUT_RPM_COUNTS){
-			engine_inj = true;
-			engine_ign = true;
-		}
-		else
-			return;
-	}
-
 	startINJ();
 
 
@@ -145,7 +130,7 @@ ISR(INT1_vect)										//******************
 	print_char('2'); print_int(IGN[highRPMindexIgn][lowMAPindex]/10);
 	print_char('3'); print_int(IGN[lowRPMindexIgn][highMAPindex]/10);
 	print_char('4'); print_int(IGN[highRPMindexIgn][highMAPindex]/10);*/
-	//engine_ign = (engine_rpm_c > REV_LIMIT_COUNTS);
+	engine_ign = (engine_rpm_c > REV_LIMIT_COUNTS);
 
 	/*uint8_t lowRPMIndex1 = 0;
 	uint8_t highRPMIndex1 = table.RPMLength - 1;
@@ -167,8 +152,16 @@ ISR(INT1_vect)										//******************
 	unsigned char degree1 = ((table.Table[highRPMIndex1] + table.Table[lowRPMIndex1]) / 2);*/
 	//print_char('d'); print_int(degree1);
 	// calculate counts for compare match B to SPARK !
+	//uint32_t ign_coil_off = (unsigned long) engine_rpm_c * (CRANK_SIGNAL_ANGLE * 10 - degree) / 3600;
 	uint16_t calc_counts = (engine_rpm_c / 360) * (CRANK_SIGNAL_ANGLE - degree);
+	//print_char('o');print_int(ign_coil_off);
+	//print_char('c');print_int(calc_counts);
 	OCR1B = calc_counts; //- TCNT1;
+	//print_char('e'); print_int(engine_rpm_c);
+	//print_char('d'); print_int(degree);
+	//uint16_t ign_coil_off = ((unsigned long) engine_rpm_c * (CRANK_SIGNAL_ANGLE * 10 - degree)) / 3600;
+	//print_char('o');print_int(ign_coil_off);
+	//print_char('c');print_int(calc_counts);
 	// calculate count for compare match A to turn on the ignition coil
 	//uint32_t calc_dwell = ((long)engine_rpm_c * ((table.dwell[highRPMIndex1] + table.dwell[lowRPMIndex1]) / 2)) / 100;
 	uint32_t calc_dwell = ((long)engine_rpm_c * ((DWELL[lowRPMindexIgn] + DWELL[highRPMindexIgn]) / 2)) / 100;

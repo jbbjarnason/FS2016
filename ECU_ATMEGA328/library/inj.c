@@ -88,6 +88,18 @@ ISR(INT0_vect)
 }
 void startINJ()
 {
+	// Check Rev limit
+	if (engine_rpm_c < REV_LIMIT_COUNTS){
+		engine_inj = false;
+	}
+	// Fuel cut hysterisis
+	if (!engine_inj){
+		if (engine_rpm_c > FUEL_CUT_RPM_COUNTS){
+			engine_inj = true;
+		}
+		else
+			return;
+	}
 	// Fuel CUTT
 	if(engine_inj){
 		PORTD |= (1 << PIND6);
