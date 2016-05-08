@@ -88,7 +88,19 @@ ISR(INT0_vect)
 }
 void startINJ()
 {
-	//print_char('S'); print_int(engine_inj);
+	// Check Rev limit
+	if (engine_rpm_c < REV_LIMIT_COUNTS){
+		engine_inj = false;
+	}
+	// Fuel cut hysterisis
+	if (!engine_inj){
+		if (engine_rpm_c > FUEL_CUT_RPM_COUNTS){
+			engine_inj = true;
+		}
+		else
+			return;
+	}
+
 	// Fuel CUTT
 	if(engine_inj && dec_cut){
 		PORTD |= (1 << PIND6);
@@ -97,18 +109,19 @@ void startINJ()
 		PORTD &= ~(1 << PIND6);
 		PORTD &= ~(1 << PIND5);
 	}
-	uint8_t VE_inter = (((long)VE[lowMAPindex][lowRPMindexInj] * (100 - p_inj) * (100 - q)) +
+	/*uint8_t VE_inter = (((long)VE[lowMAPindex][lowRPMindexInj] * (100 - p_inj) * (100 - q)) +
 					((long)VE[lowMAPindex][highRPMindexInj] * p_inj * (100 - q)) +
 					((long)VE[highMAPindex][lowRPMindexInj] * (100 - p_inj) * q) +
 					((long)VE[highMAPindex][highRPMindexInj] * p_inj * q)) / 10000;
 	uint16_t AFR_inter = (((long)AFR[lowMAPindex][lowRPMindexInj] * (100 - p_inj) * (100 - q)) +
 			((long)AFR[lowMAPindex][highRPMindexInj] * p_inj * (100 - q)) +
 			((long)AFR[highMAPindex][lowRPMindexInj] * (100 - p_inj) * q) +
-			((long)AFR[highMAPindex][highRPMindexInj] * p_inj * q)) / 1000;
+			((long)AFR[highMAPindex][highRPMindexInj] * p_inj * q)) / 1000;*/
 
-	M_fuel1 = ((unsigned long)VE_inter * engine_MAP * FUEL_CONST) / ((unsigned long) AFR_inter * (273 + engine_iat));
-	print_char('A'); print_int(accel_enrich);
-	inj_stop_time = (M_fuel1 + INJECTOR_OPENING_TIME + accel_enrich) / TIMER0_US_CONST;
+
+	//M_fuel1 = ((unsigned long)VE_inter * engine_MAP * FUEL_CONST) / ((unsigned long) AFR_inter * (273 + engine_iat));
+	//inj_stop_time = (M_fuel1 + INJECTOR_OPENING_TIME + accel_enrich) / TIMER0_US_CONST;
+
 	TCNT0 = 0;
 	OCR0B = inj_stop_time;
 }
