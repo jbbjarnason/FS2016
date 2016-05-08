@@ -152,11 +152,11 @@ ISR(INT1_vect)										//******************
 	// calculate counts for compare match B to SPARK !
 	//uint32_t ign_coil_off = (unsigned long) engine_rpm_c * (CRANK_SIGNAL_ANGLE * 10 - degree) / 3600;
 	//uint16_t calc_counts = (engine_rpm_c / 360) * (CRANK_SIGNAL_ANGLE - degree);
-	print_char('d'); print_int(degree);
+	//print_char('d'); print_int(degree);
 	//uint16_t calc_counts = ((long)engine_rpm_c * (CRANK_SIGNAL_ANGLE * 10 - degree)) / 3600;
 	//print_char('o');print_int(ign_coil_off);
 	//print_char('c');print_int(calc_counts);
-	print_char('b'); print_int(OCR1B);
+	//print_char('b'); print_int(OCR1B);
 	OCR1B = ign_coil_off; //- TCNT1;
 	//print_char('e'); print_int(engine_rpm_c);
 	//print_char('d'); print_int(degree);
@@ -175,8 +175,8 @@ ISR(INT1_vect)										//******************
 	} else { // use the calculated dwell time
 		OCR1A = engine_rpm_c - calc_dwell + OCR1B;
 	}
-	print_char('a'); print_int(OCR1A);
-	print_char('R'); print_int(engine_rpm_c);
+	//print_char('a'); print_int(OCR1A);
+	//print_char('R'); print_int(engine_rpm_c);
 	//unsigned long dwell_delay = engine_rpm_c - ((4 * (long)engine_rpm_c) / 10);
 	//OCR1A = (unsigned int) dwell_delay;
 
@@ -198,7 +198,7 @@ ISR(INT1_vect)										//******************
 // Turn on coil
 ISR(TIMER1_COMPA_vect)
 {
-	print_char('w');
+	//print_char('w');
 	if (engine_ign)
 		PORTD |= (1 << PIND4);
 	else

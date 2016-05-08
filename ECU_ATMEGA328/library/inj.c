@@ -4,13 +4,6 @@
 
 void initInjTable()
 {
-	// Initialize RPM vector
-	uint8_t temp_rpm[MAX_RPM_TABLE_LENGTH] = {15, 20, 32, 44, 56, 67, 79, 91}; // temporary rpm vector, expressed in RPM / 100
-	for (uint8_t i = 0; i < MAX_RPM_TABLE_LENGTH; i++){
-		RPM_INJ_C[i] = 600000 / ((long)temp_rpm[i] * TIMER1_US_CONST);
-		//print_string("INJ"); print_int(RPM_INJ_C[i]);
-	}
-
 	// Initialize load vector
 	LOAD[0] = 25;LOAD[1] = 36;LOAD[2] = 46;LOAD[3] = 58;LOAD[4] = 68;LOAD[5] = 80;LOAD[6] = 90;LOAD[7] = 101;
 
@@ -43,7 +36,18 @@ void initInjTable()
 	 * 25
 	 *///1500, 2000, 3200, 4400, 5600, 6700, 7900, 9100 RPM
 
-
+	// Initialize RPM vector
+	uint8_t temp_rpm[MAX_RPM_TABLE_LENGTH] = {15, 20, 32, 44, 56, 67, 79, 91}; // temporary rpm vector, expressed in RPM / 100
+	for (uint8_t i = 0; i < MAX_RPM_TABLE_LENGTH; i++){
+		RPM_INJ_C[i] = 600000 / ((long)temp_rpm[i] * TIMER1_US_CONST);
+		print_string("INJ_RPM"); print_int(temp_rpm[i]);
+		for (uint8_t j = 0; j < MAX_LOAD_TABLE_LENGTH; j++){
+			print_string("VE"); print_int(VE[i][j]);
+			print_string("AFR"); print_int(AFR[i][j]);
+		}
+		print_string("VE_Done"); new_line();
+		print_string("AFR_Done"); new_line();
+	}
 }
 
 void initInjection()
