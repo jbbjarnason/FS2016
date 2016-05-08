@@ -117,7 +117,7 @@ volatile uint8_t dec_cut;
 //volatile uint8_t VE_inter;
 //volatile uint16_t AFR_inter;
 
-volatile uint8_t accel_enrich;							// Acceleration enrichment for throttle position in µs
+volatile uint16_t accel_enrich;							// Acceleration enrichment for throttle position in µs
 
 
 

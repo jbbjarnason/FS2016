@@ -201,13 +201,21 @@ int main(void)
 					//print_char('D'); print_int(diff);
 					//print_char('A'); print_int(accel_enrich);
 				}
-				else
-					accel_enrich = 0;
+
 
 			}
+			else if(sensor_reading[TPS_PIN] < prev_TPS)
+							accel_enrich = 0;
+
+
+
 			prev_TPS = sensor_reading[TPS_PIN];
 			TPS_count = 0;
 		}
+
+
+
+
 		TPS_count++;
 
 
@@ -218,7 +226,7 @@ int main(void)
 		if(sensor_reading[TPS_PIN] < IDLE_TPS_THRESH && engine_rpm_c < DEC_THRESH_COUNT)
 		{												// If TPS sensor is in closed +5% position and the engine RPM is over idle RPM value
 			dec_cut = false;										// the injectors are disabled
-			print_char('C'); print_int(engine_inj);
+			//print_char('C'); print_int(engine_inj);
 		}
 		else if(engine_rpm_c > REV_LIMIT_COUNTS)
 		{
@@ -270,6 +278,14 @@ int main(void)
 			duty_on = 10;											// Put duty cycle to the original value
 			duty_off = 40;
 		}
+
+
+
+
+		//******************************************************************************************************//
+		//***************************************** Warm-up Enrichment *****************************************//
+		//******************************************************************************************************//
+
 
 	}
 }

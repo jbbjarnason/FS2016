@@ -88,7 +88,7 @@ ISR(INT0_vect)
 }
 void startINJ()
 {
-	print_char('S'); print_int(engine_inj);
+	//print_char('S'); print_int(engine_inj);
 	// Fuel CUTT
 	if(engine_inj && dec_cut){
 		PORTD |= (1 << PIND6);
@@ -107,6 +107,7 @@ void startINJ()
 			((long)AFR[highMAPindex][highRPMindexInj] * p_inj * q)) / 1000;
 
 	M_fuel1 = ((unsigned long)VE_inter * engine_MAP * FUEL_CONST) / ((unsigned long) AFR_inter * (273 + engine_iat));
+	print_char('A'); print_int(accel_enrich);
 	inj_stop_time = (M_fuel1 + INJECTOR_OPENING_TIME + accel_enrich) / TIMER0_US_CONST;
 	TCNT0 = 0;
 	OCR0B = inj_stop_time;
