@@ -121,6 +121,9 @@ volatile uint8_t VE_inter;
 volatile uint16_t AFR_inter;
 volatile uint32_t degree;
 
+volatile uint16_t ign_coil_off;
+volatile uint32_t calc_dwell;
+
 volatile uint8_t accel_enrich;							// Acceleration enrichment for throttle position in µs
 
 

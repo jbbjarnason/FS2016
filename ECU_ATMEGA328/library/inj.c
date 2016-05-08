@@ -117,8 +117,8 @@ void startINJ()
 			((long)AFR[highMAPindex][lowRPMindexInj] * (100 - p_inj) * q) +
 			((long)AFR[highMAPindex][highRPMindexInj] * p_inj * q)) / 1000;*/
 
-	M_fuel1 = ((unsigned long)VE_inter * engine_MAP * FUEL_CONST) / ((unsigned long) AFR_inter * (273 + engine_iat));
-	inj_stop_time = (M_fuel1 + INJECTOR_OPENING_TIME + accel_enrich) / TIMER0_US_CONST;
+	//M_fuel1 = ((unsigned long)VE_inter * engine_MAP * FUEL_CONST) / ((unsigned long) AFR_inter * (273 + engine_iat));
+	//inj_stop_time = (M_fuel1 + INJECTOR_OPENING_TIME + accel_enrich) / TIMER0_US_CONST;
 	TCNT0 = 0;
 	OCR0B = inj_stop_time;
 }

@@ -122,14 +122,14 @@ ISR(INT1_vect)										//******************
 	/*uint32_t degree = (((long)IGN[lowMAPindex][lowRPMindexIgn] * (100 - p_ign) * (100 - q)) +
 					((long)IGN[lowMAPindex][highRPMindexIgn] * p_ign * (100 - q)) +
 					((long)IGN[highMAPindex][lowRPMindexIgn] * (100 - p_ign) * q) +
-					((long)IGN[highMAPindex][highRPMindexIgn] * p_ign * q)) / 100000;*/
+					((long)IGN[highMAPindex][highRPMindexIgn] * p_ign * q)) / 10000;*/
 	/*print_char('D'); print_int(degree);
 	print_char('1'); print_int(IGN[lowRPMindexIgn][lowMAPindex]/10);
 	print_char('2'); print_int(IGN[highRPMindexIgn][lowMAPindex]/10);
 	print_char('3'); print_int(IGN[lowRPMindexIgn][highMAPindex]/10);
 	print_char('4'); print_int(IGN[highRPMindexIgn][highMAPindex]/10);*/
 	engine_ign = (engine_rpm_c > REV_LIMIT_COUNTS);
-
+	//engine_ign = true;
 	/*uint8_t lowRPMIndex1 = 0;
 	uint8_t highRPMIndex1 = table.RPMLength - 1;
 	//print_char('C');print_int(engine_rpm_c);
@@ -151,10 +151,13 @@ ISR(INT1_vect)										//******************
 	//print_char('d'); print_int(degree1);
 	// calculate counts for compare match B to SPARK !
 	//uint32_t ign_coil_off = (unsigned long) engine_rpm_c * (CRANK_SIGNAL_ANGLE * 10 - degree) / 3600;
-	uint16_t calc_counts = (engine_rpm_c / 360) * (CRANK_SIGNAL_ANGLE - degree);
+	//uint16_t calc_counts = (engine_rpm_c / 360) * (CRANK_SIGNAL_ANGLE - degree);
+	print_char('d'); print_int(degree);
+	//uint16_t calc_counts = ((long)engine_rpm_c * (CRANK_SIGNAL_ANGLE * 10 - degree)) / 3600;
 	//print_char('o');print_int(ign_coil_off);
 	//print_char('c');print_int(calc_counts);
-	OCR1B = calc_counts; //- TCNT1;
+	print_char('b'); print_int(OCR1B);
+	OCR1B = ign_coil_off; //- TCNT1;
 	//print_char('e'); print_int(engine_rpm_c);
 	//print_char('d'); print_int(degree);
 	//uint16_t ign_coil_off = ((unsigned long) engine_rpm_c * (CRANK_SIGNAL_ANGLE * 10 - degree)) / 3600;
@@ -162,7 +165,7 @@ ISR(INT1_vect)										//******************
 	//print_char('c');print_int(calc_counts);
 	// calculate count for compare match A to turn on the ignition coil
 	//uint32_t calc_dwell = ((long)engine_rpm_c * ((table.dwell[highRPMIndex1] + table.dwell[lowRPMIndex1]) / 2)) / 100;
-	uint32_t calc_dwell = ((long)engine_rpm_c * ((DWELL[lowRPMindexIgn] + DWELL[highRPMindexIgn]) / 2)) / 100;
+	//uint32_t calc_dwell = ((long)engine_rpm_c * ((DWELL[lowRPMindexIgn] + DWELL[highRPMindexIgn]) / 2)) / 100;
 	//print_char('H'); print_int(highRPMIndex1);
 	//print_char('L'); print_int(lowRPMIndex1);
 	if (OCR1B > MAX_DWELL_TIME) { // is the SPARK delay time more then maximum dwell time 9 ms ?
@@ -172,6 +175,8 @@ ISR(INT1_vect)										//******************
 	} else { // use the calculated dwell time
 		OCR1A = engine_rpm_c - calc_dwell + OCR1B;
 	}
+	print_char('a'); print_int(OCR1A);
+	print_char('R'); print_int(engine_rpm_c);
 	//unsigned long dwell_delay = engine_rpm_c - ((4 * (long)engine_rpm_c) / 10);
 	//OCR1A = (unsigned int) dwell_delay;
 
@@ -193,7 +198,7 @@ ISR(INT1_vect)										//******************
 // Turn on coil
 ISR(TIMER1_COMPA_vect)
 {
-
+	print_char('w');
 	if (engine_ign)
 		PORTD |= (1 << PIND4);
 	else

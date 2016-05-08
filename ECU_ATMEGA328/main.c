@@ -93,6 +93,8 @@ int main(void)
 					((long)IGN[lowMAPindex][highRPMindexIgn] * p_ign * (100 - q)) +
 					((long)IGN[highMAPindex][lowRPMindexIgn] * (100 - p_ign) * q) +
 					((long)IGN[highMAPindex][highRPMindexIgn] * p_ign * q)) / 10000;
+			ign_coil_off = ((long)engine_rpm_c * (CRANK_SIGNAL_ANGLE * 10 - degree)) / 3600;
+			calc_dwell = ((long)engine_rpm_c * ((DWELL[lowRPMindexIgn] + DWELL[highRPMindexIgn]) / 2)) / 100;
 
 
 			lowRPMindexInj = 0;
@@ -121,6 +123,9 @@ int main(void)
 						((long)AFR[lowMAPindex][highRPMindexInj] * p_inj * (100 - q)) +
 						((long)AFR[highMAPindex][lowRPMindexInj] * (100 - p_inj) * q) +
 						((long)AFR[highMAPindex][highRPMindexInj] * p_inj * q)) / 1000;
+
+			M_fuel1 = ((unsigned long)VE_inter * engine_MAP * FUEL_CONST) / ((unsigned long) AFR_inter * (273 + engine_iat));
+			inj_stop_time = (M_fuel1 + INJECTOR_OPENING_TIME + accel_enrich) / TIMER0_US_CONST;
 			//uint16_t indexes = lookup_table(RPM_IGN_C, MAX_RPM_TABLE_LENGTH, engine_rpm_c);
 			//lowRPMindexIgn = indexes & 0xFF;
 			//highRPMindexIgn = (indexes >> 8);
@@ -177,7 +182,7 @@ int main(void)
 				//print_string("kpa"); print_int(temp_kpa);
 				//PORTB ^= (1 << PINB4);
 				//print_int(engine_minMAP);
-				//print_serial();
+				print_serial();
 				engine_minMAP = 255;
 			}
 			second_rpm = !second_rpm;
