@@ -106,7 +106,7 @@ void startINJ()
 	}
 
 	// Fuel CUTT
-	if(engine_inj && dec_cut){
+	if(engine_inj){ //&& dec_cut){
 		PORTD |= (1 << PIND6);
 		PORTD |= (1 << PIND5);
 	} else {
