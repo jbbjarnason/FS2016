@@ -57,10 +57,14 @@ void initGlobalVariables();
 
 #define ENGINE_CC						500			// 500 cc polaris motor
 
-#define PULSE_DIVIDE					2			// number of injector pulses one round of the camshaft
-#define NR_OF_INJ_PER_CYL				2			// number of injector per cylender
-#define INJ_SIZE						5860		// Injector size 5860 mg/s
-#define R								287			// Gas constant J/(kg K)
+// ----------------------------------BREAKTHROUGH !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// Corrected 7.6.16 (not yet tested) use FUEL_CONST = 10^5 * ( ENGINE_CC / (R(287 J/Kg K)*PULSE_DIVIDE(Pulses per 2 cycle)*NR_OF_INJ_PER_CYL*INJ_SIZE(g/s)))
+// #define FUEL_CONST					7432
+
+//#define PULSE_DIVIDE					2			// number of injector pulses one round of the camshaft
+//#define NR_OF_INJ_PER_CYL				2			// number of injector per cylender
+//#define INJ_SIZE						5860		// Injector size 5860 mg/s
+//#define R								287			// Gas constant J/(kg K)
 
 #define FUEL_CONST						74324		// FUEL_CONST = ENGINE_CC * 10^9 / (R*PULSE_DIVIDE*NR_OF_INJ_PER_CYL*INJ_SIZE)
 

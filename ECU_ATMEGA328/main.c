@@ -26,6 +26,9 @@
 	return sum / length;
 }*/
 
+// AVERAGE MAP VALUE test for 2 cycles
+uint32_t ave_MAP = 0;
+uint32_t ave_MAP_cnt = 0;
 
 
 int main(void)
@@ -63,6 +66,8 @@ int main(void)
 		engine_minMapAve[temp_cnt++] = readADC(MAP_PIN);
 		temp_cnt = temp_cnt % MAP_AVERAGE_COUNTS;
 		temp_ave = median(engine_minMapAve, (int)MAP_AVERAGE_COUNTS);
+		ave_MAP += temp_ave;
+		ave_MAP_cnt++;
 		if (temp_ave < engine_minMAP)
 			engine_minMAP = temp_ave;
 
@@ -125,7 +130,7 @@ int main(void)
 						((long)AFR[highMAPindex][lowRPMindexInj] * (100 - p_inj) * q) +
 						((long)AFR[highMAPindex][highRPMindexInj] * p_inj * q)) / 1000;
 			engine_iat = manifoldTemp(sensor_reading[IAT_PIN]);
-			M_fuel1 = ((unsigned long)VE_inter * engine_MAP * FUEL_CONST) / ((unsigned long) AFR_inter * (273 + engine_iat));
+			M_fuel1 = ((unsigned long)VE_inter * engine_MAP * FUEL_CONST) / ((unsigned long) AFR_inter * (273 + engine_iat) * 2);
 			inj_stop_time = (M_fuel1 + INJECTOR_OPENING_TIME + accel_enrich) / TIMER0_US_CONST;
 			//uint16_t indexes = lookup_table(RPM_IGN_C, MAX_RPM_TABLE_LENGTH, engine_rpm_c);
 			//lowRPMindexIgn = indexes & 0xFF;
@@ -144,17 +149,18 @@ int main(void)
 			if (second_rpm){
 				//print_char('s');print_int(inj_stop_time);
 				// gera if temp_kpa í stað engine-minmap, nota signed int !!!!!
+				uint32_t temp_ave_MAP = ave_MAP / ave_MAP_cnt;
 				uint16_t temp_kpa;
 				if (engine_minMAP < 4)
 					temp_kpa = 0;
 				else
-					temp_kpa = (long) 1289 * engine_minMAP / 1000 - 5;
+					temp_kpa = (long) 1289 * temp_ave_MAP / 1000 - 5; // ATHUGA BREYTT 29.5.16
+					//temp_kpa = (long) 1289 * engine_minMAP / 1000 - 5;
 				//indexes = lookup_table(LOAD, MAX_LOAD_TABLE_LENGTH, temp_kpa);
 				//lowMAPindex = indexes & 0xFF;
 				//highMAPindex = (indexes >> 8);
 				//print_string("MAP"); print_int(temp_kpa);
 				engine_MAP = temp_kpa;
-
 
 
 				lowMAPindex = 0;
@@ -185,6 +191,9 @@ int main(void)
 				//print_int(engine_minMAP);
 				print_serial();
 				engine_minMAP = 255;
+				ave_MAP = 0;
+				ave_MAP_cnt = 0;
+
 			}
 			second_rpm = !second_rpm;
 			new_rpm = false;
