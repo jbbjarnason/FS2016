@@ -130,7 +130,7 @@ int main(void)
 						((long)AFR[highMAPindex][lowRPMindexInj] * (100 - p_inj) * q) +
 						((long)AFR[highMAPindex][highRPMindexInj] * p_inj * q)) / 1000;
 			engine_iat = manifoldTemp(sensor_reading[IAT_PIN]);
-			M_fuel1 = ((unsigned long)VE_inter * engine_MAP * FUEL_CONST) / ((unsigned long) AFR_inter * (273 + engine_iat) * 2);
+			M_fuel1 = ((unsigned long)VE_inter * engine_MAP * FUEL_CONST) / ((unsigned long) AFR_inter * (273 + engine_iat));
 			inj_stop_time = (M_fuel1 + INJECTOR_OPENING_TIME + accel_enrich) / TIMER0_US_CONST;
 			//uint16_t indexes = lookup_table(RPM_IGN_C, MAX_RPM_TABLE_LENGTH, engine_rpm_c);
 			//lowRPMindexIgn = indexes & 0xFF;
@@ -226,7 +226,8 @@ int main(void)
 
 				if(diff > TPS_THRESHOLD)							// If throttle input is high the difference goes over the threshold
 				{													// and activates the acceleration enrichment
-					accel_enrich = diff * TPS_ACCEL_ENRICH;
+					accel_enrich = diff / 2;
+					//accel_enrich = diff * TPS_ACCEL_ENRICH;
 					//print_char('D'); print_int(diff);
 					//print_char('A'); print_int(accel_enrich);
 				}

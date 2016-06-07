@@ -59,22 +59,22 @@ void initGlobalVariables();
 
 // ----------------------------------BREAKTHROUGH !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // Corrected 7.6.16 (not yet tested) use FUEL_CONST = 10^5 * ( ENGINE_CC / (R(287 J/Kg K)*PULSE_DIVIDE(Pulses per 2 cycle)*NR_OF_INJ_PER_CYL*INJ_SIZE(g/s)))
-// #define FUEL_CONST					7432
+#define FUEL_CONST					7432
 
 //#define PULSE_DIVIDE					2			// number of injector pulses one round of the camshaft
 //#define NR_OF_INJ_PER_CYL				2			// number of injector per cylender
 //#define INJ_SIZE						5860		// Injector size 5860 mg/s
 //#define R								287			// Gas constant J/(kg K)
 
-#define FUEL_CONST						74324		// FUEL_CONST = ENGINE_CC * 10^9 / (R*PULSE_DIVIDE*NR_OF_INJ_PER_CYL*INJ_SIZE)
+//#define FUEL_CONST						74324		// FUEL_CONST = ENGINE_CC * 10^9 / (R*PULSE_DIVIDE*NR_OF_INJ_PER_CYL*INJ_SIZE)
 
 
 //#define TPS_TIME_THRESHOLD				200			// TPS time threshold in milliseconds
 #define TPS_THRESHOLD					20			// TPS threshold of change after time, in 0-255 (keep in mind zero is around 50 and max 200 WOT)
-#define TPS_ACCEL_ENRICH				100			// Enrichment factor of change, TPS_ACCEL_ENRICH * Change in µs
+#define TPS_ACCEL_ENRICH				1			// Enrichment factor of change, TPS_ACCEL_ENRICH * Change in µs
 #define TPS_CYCLE						4
 
-#define DEC_THRESH_RPM					2000		// Engine RPM for deceleration threshold
+#define DEC_THRESH_RPM					3000		// Engine RPM for deceleration threshold
 #define DEC_THRESH_COUNT				60000000 / DEC_THRESH_RPM / TIMER1_US_CONST			// Engine count for deceleration threshold, used to cut off inj. when decelerating
 #define IDLE_TPS_THRESH					60			// Indicates when throttle is fully closed
 
