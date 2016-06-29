@@ -130,8 +130,21 @@ int main(void)
 						((long)AFR[highMAPindex][lowRPMindexInj] * (100 - p_inj) * q) +
 						((long)AFR[highMAPindex][highRPMindexInj] * p_inj * q)) / 1000;
 			engine_iat = manifoldTemp(sensor_reading[IAT_PIN]);
-			M_fuel1 = ((unsigned long)VE_inter * engine_MAP * FUEL_CONST) / ((unsigned long) AFR_inter * (273 + engine_iat));
-			inj_stop_time = (M_fuel1 + INJECTOR_OPENING_TIME + accel_enrich) / TIMER0_US_CONST;
+			if(engine_rpm_c > STARTUP_COUNTS) // Starting under 1000 RPM
+				startup_enrichment = 2;
+			else
+				startup_enrichment = 1;
+
+			uint8_t after_start_enrichment = 10;
+			if(millis < 60000)
+				after_start_enrichment = 20;
+
+			//M_fuel1 = ((unsigned long)VE_inter * engine_MAP * FUEL_CONST) / ((unsigned long) AFR_inter * (273 + engine_iat));
+			engine_iat = 70; //shitmix
+			M_fuel1 = ((unsigned long)VE_inter * engine_MAP * FUEL_CONST * startup_enrichment) / ((unsigned long) AFR_inter * (273 + engine_iat));
+			M_fuel1 = (M_fuel1 * after_start_enrichment) / 10;
+			//inj_stop_time = (M_fuel1 + INJECTOR_OPENING_TIME + accel_enrich) / TIMER0_US_CONST;
+			inj_stop_time = (M_fuel1 + INJECTOR_OPENING_TIME) / TIMER0_US_CONST;
 			//uint16_t indexes = lookup_table(RPM_IGN_C, MAX_RPM_TABLE_LENGTH, engine_rpm_c);
 			//lowRPMindexIgn = indexes & 0xFF;
 			//highRPMindexIgn = (indexes >> 8);

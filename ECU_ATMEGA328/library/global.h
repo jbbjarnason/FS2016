@@ -52,7 +52,7 @@ void initGlobalVariables();
 #define MAX_RPM_TABLE_LENGTH			8
 #define MAX_LOAD_TABLE_LENGTH			8
 
-#define INJECTOR_OPENING_TIME			1400 		// injector opening time in 탎, 1000탎 = 1ms
+#define INJECTOR_OPENING_TIME			1200 		// injector opening time in 탎, 1000탎 = 1ms
 #define INTAKE_VALVE_DEGREES			45			// Intake valve fully open in degrees
 
 #define ENGINE_CC						500			// 500 cc polaris motor
@@ -78,6 +78,9 @@ void initGlobalVariables();
 #define DEC_THRESH_COUNT				60000000 / DEC_THRESH_RPM / TIMER1_US_CONST			// Engine count for deceleration threshold, used to cut off inj. when decelerating
 #define IDLE_TPS_THRESH					60			// Indicates when throttle is fully closed
 
+#define STARTUP_RPM						1000
+#define STARTUP_COUNTS					60000000 / STARTUP_RPM / TIMER1_US_CONST
+uint8_t startup_enrichment;
 
 uint8_t lowMAPindex;
 uint8_t highMAPindex;
